@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, firstName, lastName, companyName } = await request.json();
+    const { email, password, firstName, lastName, companyName } =
+      await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -29,10 +30,7 @@ export async function POST(request: NextRequest) {
 
     if (authError) {
       console.error("Supabase auth error:", authError);
-      return NextResponse.json(
-        { error: authError.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
     if (!authData.user) {
@@ -43,12 +41,12 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
+      {
         message: "User created successfully",
         user: {
           id: authData.user.id,
           email: authData.user.email,
-        }
+        },
       },
       { status: 201 }
     );

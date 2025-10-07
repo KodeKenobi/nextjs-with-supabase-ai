@@ -13,7 +13,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, Brain, Mail, Lock, User, Building, Loader2 } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Brain,
+  Mail,
+  Lock,
+  User,
+  Building,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -86,7 +95,9 @@ export function SignUpForm({
         if (!error) {
           router.replace("/dashboard");
         } else {
-          setError("Account created but sign in failed. Please try logging in.");
+          setError(
+            "Account created but sign in failed. Please try logging in."
+          );
         }
       } else {
         const data = await response.json();
@@ -105,7 +116,9 @@ export function SignUpForm({
         <div className="flex justify-center mb-4">
           <Brain className="h-12 w-12 text-blue-600" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Create your account
+        </h1>
         <p className="text-gray-600">Start transforming your content with AI</p>
       </div>
 
