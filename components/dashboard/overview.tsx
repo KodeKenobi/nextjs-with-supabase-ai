@@ -16,10 +16,8 @@ import {
   BarChart3,
   Upload,
   Search,
-  AlertTriangle,
   Plus,
   TrendingUp,
-  Users,
   Database,
 } from "lucide-react";
 import Link from "next/link";
@@ -38,7 +36,12 @@ interface DashboardStats {
   companies: number;
   contentItems: number;
   insights: number;
-  recentActivity: any[];
+  recentActivity: Array<{
+    id: string;
+    title: string;
+    created_at: string;
+    content_type: string;
+  }>;
 }
 
 export default function DashboardOverview({ user }: { user: User }) {
@@ -155,7 +158,7 @@ export default function DashboardOverview({ user }: { user: User }) {
           Welcome back, {user.user_metadata?.first_name || "User"}!
         </h1>
         <p className="text-gray-600">
-          Here's what's happening with your AI Data Repository.
+          Here&apos;s what&apos;s happening with your AI Data Repository.
         </p>
       </div>
 
