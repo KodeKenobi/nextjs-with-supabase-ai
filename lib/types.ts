@@ -1,9 +1,38 @@
-export type ContentType = 'AUDIO' | 'VIDEO' | 'BLOG_ARTICLE' | 'DOCUMENT' | 'TEXT';
-export type ContentSource = 'FILE_UPLOAD' | 'YOUTUBE_URL' | 'BLOG_URL' | 'DIRECT_INPUT';
-export type ProcessingStatus = 'PENDING' | 'TRANSCRIBING' | 'ANALYZING' | 'COMPLETED' | 'FAILED';
-export type InsightCategory = 'BUSINESS_MODEL' | 'MARKETING' | 'OPERATIONS' | 'FINANCIAL' | 'STRATEGIC' | 'CUSTOMER' | 'PRODUCT' | 'COMPETITIVE' | 'RISKS' | 'OPPORTUNITIES';
-export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type CompanyType = 'SUPPLIER' | 'COMPETITOR' | 'PARTNER' | 'TARGET' | 'CUSTOMER';
+export type ContentType =
+  | "AUDIO"
+  | "VIDEO"
+  | "BLOG_ARTICLE"
+  | "DOCUMENT"
+  | "TEXT";
+export type ContentSource =
+  | "FILE_UPLOAD"
+  | "YOUTUBE_URL"
+  | "BLOG_URL"
+  | "DIRECT_INPUT";
+export type ProcessingStatus =
+  | "PENDING"
+  | "TRANSCRIBING"
+  | "ANALYZING"
+  | "COMPLETED"
+  | "FAILED";
+export type InsightCategory =
+  | "BUSINESS_MODEL"
+  | "MARKETING"
+  | "OPERATIONS"
+  | "FINANCIAL"
+  | "STRATEGIC"
+  | "CUSTOMER"
+  | "PRODUCT"
+  | "COMPETITIVE"
+  | "RISKS"
+  | "OPPORTUNITIES";
+export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type CompanyType =
+  | "SUPPLIER"
+  | "COMPETITOR"
+  | "PARTNER"
+  | "TARGET"
+  | "CUSTOMER";
 
 export interface Company {
   id: string;

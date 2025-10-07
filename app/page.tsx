@@ -12,10 +12,12 @@ import Link from "next/link";
 
 export default async function Home() {
   const supabase = await createClient();
-  
+
   // Check if user is authenticated
-  const { data: { user } } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Redirect to dashboard if user is logged in
   if (user) {
     redirect("/dashboard");

@@ -2,19 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Building2, 
-  FileText, 
-  BarChart3, 
-  Upload, 
-  Search, 
+import {
+  Building2,
+  FileText,
+  BarChart3,
+  Upload,
+  Search,
   AlertTriangle,
   Plus,
   TrendingUp,
   Users,
-  Database
+  Database,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -40,14 +46,14 @@ export default function DashboardOverview({ user }: { user: User }) {
     companies: 0,
     contentItems: 0,
     insights: 0,
-    recentActivity: []
+    recentActivity: [],
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchStats() {
       const supabase = createClient();
-      
+
       try {
         // Fetch companies count
         const { count: companiesCount } = await supabase
@@ -78,7 +84,7 @@ export default function DashboardOverview({ user }: { user: User }) {
           companies: companiesCount || 0,
           contentItems: contentCount || 0,
           insights: insightsCount || 0,
-          recentActivity: recentContent || []
+          recentActivity: recentContent || [],
         });
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);
@@ -96,29 +102,29 @@ export default function DashboardOverview({ user }: { user: User }) {
       description: "Create a new company profile",
       icon: Building2,
       href: "/dashboard/companies",
-      color: "bg-blue-500 hover:bg-blue-600"
+      color: "bg-blue-500 hover:bg-blue-600",
     },
     {
       title: "Upload Content",
       description: "Add new content for analysis",
       icon: Upload,
       href: "/dashboard/upload",
-      color: "bg-green-500 hover:bg-green-600"
+      color: "bg-green-500 hover:bg-green-600",
     },
     {
       title: "View Insights",
       description: "Explore business insights",
       icon: BarChart3,
       href: "/dashboard/insights",
-      color: "bg-purple-500 hover:bg-purple-600"
+      color: "bg-purple-500 hover:bg-purple-600",
     },
     {
       title: "Search Companies",
       description: "Find and analyze companies",
       icon: Search,
       href: "/dashboard/companies",
-      color: "bg-orange-500 hover:bg-orange-600"
-    }
+      color: "bg-orange-500 hover:bg-orange-600",
+    },
   ];
 
   if (loading) {
@@ -196,11 +202,15 @@ export default function DashboardOverview({ user }: { user: User }) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Recent Activity
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.recentActivity.length}</div>
+            <div className="text-2xl font-bold">
+              {stats.recentActivity.length}
+            </div>
             <p className="text-xs text-muted-foreground">
               Items in last 5 activities
             </p>
@@ -213,7 +223,10 @@ export default function DashboardOverview({ user }: { user: User }) {
         {quickActions.map((action) => {
           const Icon = action.icon;
           return (
-            <Card key={action.title} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={action.title}
+              className="hover:shadow-lg transition-shadow"
+            >
               <CardHeader>
                 <div className="flex items-center space-x-2">
                   <div className={`p-2 rounded-lg ${action.color} text-white`}>
@@ -240,7 +253,9 @@ export default function DashboardOverview({ user }: { user: User }) {
       <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Your latest content uploads and activities</CardDescription>
+          <CardDescription>
+            Your latest content uploads and activities
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {stats.recentActivity.length > 0 ? (
@@ -253,7 +268,8 @@ export default function DashboardOverview({ user }: { user: User }) {
                   <div className="flex-1">
                     <p className="text-sm font-medium">{item.title}</p>
                     <p className="text-xs text-gray-500">
-                      {item.content_type} • {new Date(item.created_at).toLocaleDateString()}
+                      {item.content_type} •{" "}
+                      {new Date(item.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -263,7 +279,9 @@ export default function DashboardOverview({ user }: { user: User }) {
             <div className="text-center py-8">
               <Database className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">No recent activity</p>
-              <p className="text-sm text-gray-400">Upload some content to get started</p>
+              <p className="text-sm text-gray-400">
+                Upload some content to get started
+              </p>
             </div>
           )}
         </CardContent>

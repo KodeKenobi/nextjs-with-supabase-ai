@@ -5,9 +5,12 @@ import UploadPage from "@/components/upload/upload-page";
 
 export default async function UploadPageRoute() {
   const supabase = await createClient();
-  
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
   if (error || !user) {
     redirect("/auth/login");
   }

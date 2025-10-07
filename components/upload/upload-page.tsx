@@ -2,19 +2,25 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { 
-  Upload, 
-  FileText, 
-  Link, 
-  Type, 
+import {
+  Upload,
+  FileText,
+  Link,
+  Type,
   Loader2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 
 export default function UploadPage() {
@@ -23,13 +29,19 @@ export default function UploadPage() {
   const [url, setUrl] = useState("");
   const [uploadType, setUploadType] = useState<"text" | "url">("text");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const handleTextUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !text.trim()) {
-      setMessage({ type: "error", text: "Please provide both title and text content" });
+      setMessage({
+        type: "error",
+        text: "Please provide both title and text content",
+      });
       return;
     }
 
@@ -38,7 +50,9 @@ export default function UploadPage() {
 
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         throw new Error("You must be logged in to upload content");
@@ -62,13 +76,16 @@ export default function UploadPage() {
         throw new Error(data.error || "Failed to process text");
       }
 
-      setMessage({ type: "success", text: "Content uploaded and processed successfully!" });
+      setMessage({
+        type: "success",
+        text: "Content uploaded and processed successfully!",
+      });
       setTitle("");
       setText("");
     } catch (error) {
-      setMessage({ 
-        type: "error", 
-        text: error instanceof Error ? error.message : "An error occurred" 
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "An error occurred",
       });
     } finally {
       setLoading(false);
@@ -77,7 +94,7 @@ export default function UploadPage() {
 
   const handleUrlUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !url.trim()) {
       setMessage({ type: "error", text: "Please provide both title and URL" });
       return;
@@ -88,14 +105,14 @@ export default function UploadPage() {
 
     try {
       // For now, we'll just show a message that URL upload is not implemented
-      setMessage({ 
-        type: "error", 
-        text: "URL upload is not yet implemented. Please use text upload for now." 
+      setMessage({
+        type: "error",
+        text: "URL upload is not yet implemented. Please use text upload for now.",
       });
     } catch (error) {
-      setMessage({ 
-        type: "error", 
-        text: error instanceof Error ? error.message : "An error occurred" 
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "An error occurred",
       });
     } finally {
       setLoading(false);
@@ -140,14 +157,15 @@ export default function UploadPage() {
           <CardTitle className="flex items-center space-x-2">
             <Upload className="h-5 w-5" />
             <span>
-              {uploadType === "text" ? "Upload Text Content" : "Upload from URL"}
+              {uploadType === "text"
+                ? "Upload Text Content"
+                : "Upload from URL"}
             </span>
           </CardTitle>
           <CardDescription>
-            {uploadType === "text" 
+            {uploadType === "text"
               ? "Paste your text content directly for AI analysis"
-              : "Provide a URL to extract and analyze content"
-            }
+              : "Provide a URL to extract and analyze content"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -221,7 +239,13 @@ export default function UploadPage() {
 
       {/* Message Display */}
       {message && (
-        <Card className={message.type === "success" ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
+        <Card
+          className={
+            message.type === "success"
+              ? "border-green-200 bg-green-50"
+              : "border-red-200 bg-red-50"
+          }
+        >
           <CardContent className="pt-6">
             <div className="flex items-center space-x-2">
               {message.type === "success" ? (
@@ -229,7 +253,11 @@ export default function UploadPage() {
               ) : (
                 <AlertCircle className="h-5 w-5 text-red-600" />
               )}
-              <p className={message.type === "success" ? "text-green-800" : "text-red-800"}>
+              <p
+                className={
+                  message.type === "success" ? "text-green-800" : "text-red-800"
+                }
+              >
                 {message.text}
               </p>
             </div>

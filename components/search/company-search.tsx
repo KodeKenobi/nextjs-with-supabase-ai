@@ -2,21 +2,27 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  Building2, 
-  ExternalLink, 
-  MapPin, 
-  Users, 
+import {
+  Search,
+  Building2,
+  ExternalLink,
+  MapPin,
+  Users,
   TrendingUp,
   Globe,
   Phone,
   Mail,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { Company } from "@/lib/types";
 
@@ -33,7 +39,9 @@ export default function CompanySearch() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/search/companies?q=${encodeURIComponent(query)}`);
+      const response = await fetch(
+        `/api/search/companies?q=${encodeURIComponent(query)}`
+      );
       const data = await response.json();
 
       if (!response.ok) {
@@ -117,7 +125,10 @@ export default function CompanySearch() {
 
           <div className="grid gap-6">
             {companies.map((company) => (
-              <Card key={company.id} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={company.id}
+                className="hover:shadow-lg transition-shadow"
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
@@ -125,7 +136,9 @@ export default function CompanySearch() {
                         <Building2 className="h-6 w-6 text-blue-600" />
                       </div>
                       <div>
-                        <CardTitle className="text-xl">{company.name}</CardTitle>
+                        <CardTitle className="text-xl">
+                          {company.name}
+                        </CardTitle>
                         {company.trading_name && (
                           <p className="text-sm text-gray-600">
                             Trading as: {company.trading_name}
@@ -167,7 +180,8 @@ export default function CompanySearch() {
                         <div className="flex items-center space-x-2">
                           <Users className="h-4 w-4 text-gray-500" />
                           <span className="text-sm">
-                            <strong>Size:</strong> {formatCompanySize(company.size)}
+                            <strong>Size:</strong>{" "}
+                            {formatCompanySize(company.size)}
                           </span>
                         </div>
                       )}
@@ -176,7 +190,8 @@ export default function CompanySearch() {
                         <div className="flex items-center space-x-2">
                           <TrendingUp className="h-4 w-4 text-gray-500" />
                           <span className="text-sm">
-                            <strong>Revenue:</strong> {formatRevenue(company.revenue)}
+                            <strong>Revenue:</strong>{" "}
+                            {formatRevenue(company.revenue)}
                           </span>
                         </div>
                       )}

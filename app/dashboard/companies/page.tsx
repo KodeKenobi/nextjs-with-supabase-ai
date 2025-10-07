@@ -5,9 +5,12 @@ import CompanySearch from "@/components/search/company-search";
 
 export default async function CompaniesPage() {
   const supabase = await createClient();
-  
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
   if (error || !user) {
     redirect("/auth/login");
   }
