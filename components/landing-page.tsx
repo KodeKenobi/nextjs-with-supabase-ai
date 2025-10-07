@@ -26,10 +26,10 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/auth/login">
+              <Link href="/login">
                 <Button variant="ghost">Sign In</Button>
               </Link>
-              <Link href="/auth/sign-up">
+              <Link href="/register">
                 <Button>Get Started</Button>
               </Link>
             </div>
@@ -49,7 +49,7 @@ export default function LandingPage() {
             transcriptions, insights, and consistency analysis for your business
             content.
           </p>
-          <Link href="/auth/sign-up">
+          <Link href="/register">
             <Button size="lg" className="text-lg px-8 py-4">
               Start Your Analysis
             </Button>
@@ -162,7 +162,7 @@ export default function LandingPage() {
             Join businesses using AI to transform their content into actionable
             insights.
           </p>
-          <Link href="/auth/sign-up">
+          <Link href="/register">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
               Get Started for Free
             </Button>
