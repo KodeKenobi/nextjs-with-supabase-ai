@@ -79,7 +79,7 @@ export default function DashboardNavigation({ user }: NavigationProps) {
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   const firstName = user?.user_metadata?.first_name;
