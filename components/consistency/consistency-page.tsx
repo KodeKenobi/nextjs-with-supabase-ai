@@ -58,55 +58,17 @@ export default function ConsistencyPage() {
 
   const fetchReports = async () => {
     try {
-      // For now, return mock data - will be implemented with Supabase
-      setReports([
-        {
-          id: "1",
-          title: "Q4 2024 Content Consistency Report",
-          description: "Analysis of all content uploaded in Q4 2024",
-          total_contradictions: 3,
-          contradictions: [
-            {
-              id: "1",
-              content1: "Our pricing starts at $99/month for the basic plan",
-              content2: "The basic plan is available for $79/month",
-              severity: "HIGH",
-              category: "PRICING",
-              source1: {
-                id: "1",
-                title: "Product Demo Video",
-                type: "VIDEO",
-              },
-              source2: {
-                id: "2",
-                title: "Pricing Page Content",
-                type: "TEXT",
-              },
-            },
-            {
-              id: "2",
-              content1: "We support 50+ integrations",
-              content2: "Our platform integrates with over 100 services",
-              severity: "MEDIUM",
-              category: "FEATURES",
-              source1: {
-                id: "3",
-                title: "Feature Overview Audio",
-                type: "AUDIO",
-              },
-              source2: {
-                id: "4",
-                title: "Integration Documentation",
-                type: "DOCUMENT",
-              },
-            },
-          ],
-          created_at: new Date().toISOString(),
-          status: "COMPLETED",
-        },
-      ]);
+      const response = await fetch('/api/consistency');
+      if (response.ok) {
+        const data = await response.json();
+        setReports(data);
+      } else {
+        console.error('Failed to fetch consistency reports');
+        setReports([]);
+      }
     } catch (error) {
       console.error("Error fetching reports:", error);
+      setReports([]);
     } finally {
       setLoading(false);
     }

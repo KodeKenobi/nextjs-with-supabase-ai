@@ -58,60 +58,17 @@ export default function GapAnalysisPage() {
 
   const fetchReports = async () => {
     try {
-      // For now, return mock data - will be implemented with Supabase
-      setReports([
-        {
-          id: "1",
-          title: "Q4 2024 Content Gap Analysis",
-          description: "Analysis of content gaps and opportunities",
-          total_gaps: 5,
-          priority_gaps: 2,
-          gaps: [
-            {
-              id: "1",
-              title: "Missing Customer Success Stories",
-              description:
-                "No case studies or success stories found in current content",
-              category: "MARKETING",
-              priority: "HIGH",
-              impact: "HIGH",
-              effort: "MEDIUM",
-              recommendations: [
-                "Interview existing customers for case studies",
-                "Create video testimonials",
-                "Develop success story templates",
-              ],
-              related_content: [
-                {
-                  id: "1",
-                  title: "Product Demo Video",
-                  type: "VIDEO",
-                },
-              ],
-            },
-            {
-              id: "2",
-              title: "Limited Technical Documentation",
-              description:
-                "Insufficient technical documentation for developers",
-              category: "TECHNICAL",
-              priority: "CRITICAL",
-              impact: "HIGH",
-              effort: "HIGH",
-              recommendations: [
-                "Create comprehensive API documentation",
-                "Develop integration guides",
-                "Add code examples and tutorials",
-              ],
-              related_content: [],
-            },
-          ],
-          created_at: new Date().toISOString(),
-          status: "COMPLETED",
-        },
-      ]);
+      const response = await fetch('/api/gaps');
+      if (response.ok) {
+        const data = await response.json();
+        setReports(data);
+      } else {
+        console.error('Failed to fetch gap analysis reports');
+        setReports([]);
+      }
     } catch (error) {
       console.error("Error fetching reports:", error);
+      setReports([]);
     } finally {
       setLoading(false);
     }

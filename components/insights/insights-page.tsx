@@ -46,56 +46,17 @@ export default function InsightsPage() {
 
   const fetchInsights = async () => {
     try {
-      // For now, return mock data - will be implemented with Supabase
-      setInsights([
-        {
-          id: "1",
-          category: "BUSINESS_MODEL",
-          title: "Revenue Model Identified",
-          content:
-            "The content mentions a subscription-based revenue model with tiered pricing for different customer segments.",
-          priority: "HIGH",
-          confidence: 0.88,
-          created_at: new Date().toISOString(),
-          content_item: {
-            id: "1",
-            title: "Product Demo Video",
-            content_type: "VIDEO",
-          },
-        },
-        {
-          id: "2",
-          category: "MARKETING",
-          title: "Target Market Analysis",
-          content:
-            "The target market appears to be small to medium-sized businesses in the technology sector.",
-          priority: "MEDIUM",
-          confidence: 0.75,
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          content_item: {
-            id: "2",
-            title: "Marketing Strategy Document",
-            content_type: "DOCUMENT",
-          },
-        },
-        {
-          id: "3",
-          category: "RISKS",
-          title: "Competitive Threat Identified",
-          content:
-            "There's a mention of a major competitor entering the market with similar offerings.",
-          priority: "CRITICAL",
-          confidence: 0.92,
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-          content_item: {
-            id: "3",
-            title: "Market Research Audio",
-            content_type: "AUDIO",
-          },
-        },
-      ]);
+      const response = await fetch('/api/insights');
+      if (response.ok) {
+        const data = await response.json();
+        setInsights(data);
+      } else {
+        console.error('Failed to fetch insights');
+        setInsights([]);
+      }
     } catch (error) {
       console.error("Error fetching insights:", error);
+      setInsights([]);
     } finally {
       setLoading(false);
     }

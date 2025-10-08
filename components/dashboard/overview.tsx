@@ -126,9 +126,58 @@ export default function DashboardOverview({ user }: { user: any }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // For now, set default values to prevent white screen
-    setLoading(false);
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch content items
+      const contentResponse = await fetch('/api/content');
+      const contentData = contentResponse.ok ? await contentResponse.json() : [];
+      
+      // Fetch business insights
+      const insightsResponse = await fetch('/api/insights');
+      const insightsData = insightsResponse.ok ? await insightsResponse.json() : [];
+      
+      // Fetch consistency reports
+      const consistencyResponse = await fetch('/api/consistency');
+      const consistencyData = consistencyResponse.ok ? await consistencyResponse.json() : [];
+      
+      // Fetch gap analysis reports
+      const gapsResponse = await fetch('/api/gaps');
+      const gapsData = gapsResponse.ok ? await gapsResponse.json() : [];
+
+      // Calculate stats
+      const totalContent = contentData.length || 0;
+      const totalInsights = insightsData.length || 0;
+      const processedContent = contentData.filter((item: any) => item.status === 'COMPLETED').length || 0;
+      const pendingContent = contentData.filter((item: any) => item.status === 'PENDING').length || 0;
+
+      setStats({
+        totalContent,
+        totalInsights,
+        processedContent,
+        pendingContent,
+      });
+
+      // Set recent data (last 5 items)
+      setRecentContent(contentData.slice(0, 5) || []);
+      setRecentInsights(insightsData.slice(0, 5) || []);
+      setConsistencyReport(consistencyData[0] || null);
+      setGapAnalysisReport(gapsData[0] || null);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      // Set default values on error
+      setStats({
+        totalContent: 0,
+        totalInsights: 0,
+        processedContent: 0,
+        pendingContent: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const displayName =
     user?.user_metadata?.first_name && user?.user_metadata?.last_name
