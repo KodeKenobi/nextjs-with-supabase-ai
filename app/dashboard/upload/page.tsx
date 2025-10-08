@@ -12,7 +12,7 @@ export default async function UploadPageRoute() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   return (
@@ -23,7 +23,7 @@ export default async function UploadPageRoute() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Upload Content</h1>
             <p className="mt-2 text-gray-600">
-              Upload and process content for AI analysis and insights.
+              Upload audio, video, or text content for analysis
             </p>
           </div>
           <UploadPage />

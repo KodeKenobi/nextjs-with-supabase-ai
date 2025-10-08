@@ -1,74 +1,76 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Search,
-  Building2,
-  ExternalLink,
-  MapPin,
-  Users,
-  TrendingUp,
-  Globe,
-  Phone,
-  Mail,
-  Loader2,
-} from "lucide-react";
-import { Company } from "@/lib/types";
+import { Search, Building2, ExternalLink, Plus } from "lucide-react";
+import Link from "next/link";
+
+interface Company {
+  id: string;
+  name: string;
+  description?: string;
+  industry?: string;
+  website?: string;
+  country?: string;
+  size?: string;
+  type?: string;
+  created_at: string;
+}
+
+interface SearchResults {
+  companies: Company[];
+  relatedContent: any[];
+  query: string;
+}
 
 export default function CompanySearch() {
   const [query, setQuery] = useState("");
-  const [companies, setCompanies] = useState<Company[]>([]);
+  const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
-  const searchCompanies = async () => {
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!query.trim()) return;
 
     setLoading(true);
-    setError(null);
+    setError("");
 
     try {
       const response = await fetch(
         `/api/search/companies?q=${encodeURIComponent(query)}`
       );
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Failed to search companies");
+        throw new Error("Search failed");
       }
-
-      setCompanies(data.companies || []);
+      const data = await response.json();
+      setResults(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setCompanies([]);
+      setError("Failed to search companies");
+      console.error("Search error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    searchCompanies();
-  };
-
-  const formatCompanySize = (size: string) => {
-    if (!size) return "Unknown";
-    return size;
-  };
-
-  const formatRevenue = (revenue: string) => {
-    if (!revenue) return "Not disclosed";
-    return revenue;
+  const getTypeColor = (type?: string) => {
+    switch (type?.toLowerCase()) {
+      case "supplier":
+        return "bg-blue-100 text-blue-800";
+      case "competitor":
+        return "bg-red-100 text-red-800";
+      case "partner":
+        return "bg-green-100 text-green-800";
+      case "target":
+        return "bg-purple-100 text-purple-800";
+      case "customer":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
@@ -76,29 +78,21 @@ export default function CompanySearch() {
       {/* Search Form */}
       <Card>
         <CardHeader>
-          <CardTitle>Search Companies</CardTitle>
-          <CardDescription>
-            Find companies by name, industry, or other criteria
-          </CardDescription>
+          <CardTitle className="flex items-center">
+            <Search className="h-5 w-5 mr-2" />
+            Search Companies
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="flex space-x-4">
-            <div className="flex-1">
-              <Input
-                type="text"
-                placeholder="Enter company name, industry, or keywords..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="w-full"
-              />
-            </div>
+          <form onSubmit={handleSearch} className="flex gap-4">
+            <Input
+              placeholder="Search for companies..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="flex-1"
+            />
             <Button type="submit" disabled={loading || !query.trim()}>
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-              Search
+              {loading ? "Searching..." : "Search"}
             </Button>
           </form>
         </CardContent>
@@ -106,36 +100,47 @@ export default function CompanySearch() {
 
       {/* Error Message */}
       {error && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <p className="text-red-600">{error}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-800">{error}</p>
+        </div>
       )}
 
-      {/* Results */}
-      {companies.length > 0 && (
-        <div className="space-y-4">
+      {/* Search Results */}
+      {results && (
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">
-              Found {companies.length} companies
+              Search Results for "{results.query}"
             </h2>
+            <span className="text-sm text-gray-500">
+              {results.companies.length} companies found
+            </span>
           </div>
 
-          <div className="grid gap-6">
-            {companies.map((company) => (
-              <Card
-                key={company.id}
-                className="hover:shadow-lg transition-shadow"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <Building2 className="h-6 w-6 text-blue-600" />
-                      </div>
+          {results.companies.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-gray-500 mb-4">No companies found</p>
+                <Button asChild>
+                  <Link href="/dashboard/companies/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Company
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {results.companies.map((company) => (
+                <Card
+                  key={company.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-xl">
+                        <CardTitle className="text-lg">
                           {company.name}
                         </CardTitle>
                         {company.trading_name && (
@@ -144,139 +149,107 @@ export default function CompanySearch() {
                           </p>
                         )}
                       </div>
+                      {company.type && (
+                        <Badge className={getTypeColor(company.type)}>
+                          {company.type}
+                        </Badge>
+                      )}
                     </div>
-                    <Badge variant="outline">{company.type}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* Description */}
+                  </CardHeader>
+                  <CardContent>
                     {company.description && (
-                      <p className="text-gray-700">{company.description}</p>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        {company.description}
+                      </p>
                     )}
-
-                    {/* Key Information */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-2">
                       {company.industry && (
-                        <div className="flex items-center space-x-2">
-                          <TrendingUp className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm">
-                            <strong>Industry:</strong> {company.industry}
+                        <div className="flex items-center text-sm">
+                          <span className="font-medium text-gray-700">
+                            Industry:
+                          </span>
+                          <span className="ml-2 text-gray-600">
+                            {company.industry}
                           </span>
                         </div>
                       )}
-
                       {company.country && (
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm">
-                            <strong>Country:</strong> {company.country}
+                        <div className="flex items-center text-sm">
+                          <span className="font-medium text-gray-700">
+                            Country:
+                          </span>
+                          <span className="ml-2 text-gray-600">
+                            {company.country}
                           </span>
                         </div>
                       )}
-
                       {company.size && (
-                        <div className="flex items-center space-x-2">
-                          <Users className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm">
-                            <strong>Size:</strong>{" "}
-                            {formatCompanySize(company.size)}
+                        <div className="flex items-center text-sm">
+                          <span className="font-medium text-gray-700">
+                            Size:
                           </span>
-                        </div>
-                      )}
-
-                      {company.revenue && (
-                        <div className="flex items-center space-x-2">
-                          <TrendingUp className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm">
-                            <strong>Revenue:</strong>{" "}
-                            {formatRevenue(company.revenue)}
-                          </span>
-                        </div>
-                      )}
-
-                      {company.ceo && (
-                        <div className="flex items-center space-x-2">
-                          <Users className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm">
-                            <strong>CEO:</strong> {company.ceo}
-                          </span>
-                        </div>
-                      )}
-
-                      {company.founded_year && (
-                        <div className="flex items-center space-x-2">
-                          <TrendingUp className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm">
-                            <strong>Founded:</strong> {company.founded_year}
+                          <span className="ml-2 text-gray-600">
+                            {company.size}
                           </span>
                         </div>
                       )}
                     </div>
-
-                    {/* Contact Information */}
-                    <div className="flex flex-wrap gap-4 pt-4 border-t">
+                    <div className="mt-4 flex gap-2">
                       {company.website && (
-                        <a
-                          href={company.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
-                        >
-                          <Globe className="h-4 w-4" />
-                          <span className="text-sm">Website</span>
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
+                        <Button size="sm" variant="outline" asChild>
+                          <a
+                            href={company.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center"
+                          >
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            Website
+                          </a>
+                        </Button>
                       )}
-
-                      {company.linkedin && (
-                        <a
-                          href={company.linkedin}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
-                        >
-                          <Globe className="h-4 w-4" />
-                          <span className="text-sm">LinkedIn</span>
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-
-                      {company.phone && (
-                        <div className="flex items-center space-x-1 text-gray-600">
-                          <Phone className="h-4 w-4" />
-                          <span className="text-sm">{company.phone}</span>
-                        </div>
-                      )}
-
-                      {company.email && (
-                        <div className="flex items-center space-x-1 text-gray-600">
-                          <Mail className="h-4 w-4" />
-                          <span className="text-sm">{company.email}</span>
-                        </div>
-                      )}
+                      <Button size="sm" asChild>
+                        <Link href={`/dashboard/companies/${company.id}`}>
+                          View Details
+                        </Link>
+                      </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* No Results */}
-      {companies.length === 0 && !loading && query && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No companies found</p>
-              <p className="text-sm text-gray-400">
-                Try searching with different keywords
-              </p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          )}
+
+          {/* Related Content */}
+          {results.relatedContent && results.relatedContent.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold mb-4">Related Content</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {results.relatedContent.map((content) => (
+                  <Card
+                    key={content.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardContent className="p-4">
+                      <h4 className="font-medium text-gray-900">
+                        {content.title}
+                      </h4>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {content.description || "No description available"}
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {content.content_type?.replace("_", " ")}
+                        </Badge>
+                        <Badge className="text-xs">{content.status}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

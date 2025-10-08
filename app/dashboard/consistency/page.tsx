@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import DashboardNavigation from "@/components/dashboard/navigation";
-import CompanySearch from "@/components/search/company-search";
+import ConsistencyPage from "@/components/consistency/consistency-page";
 
-export default async function CompaniesPage() {
+export default async function ConsistencyPageRoute() {
   const supabase = await createClient();
 
   const {
@@ -21,12 +21,14 @@ export default async function CompaniesPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Companies</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Consistency Check
+            </h1>
             <p className="mt-2 text-gray-600">
-              Search and manage company information
+              Analyze your content for contradictions and inconsistencies
             </p>
           </div>
-          <CompanySearch />
+          <ConsistencyPage />
         </div>
       </main>
     </div>

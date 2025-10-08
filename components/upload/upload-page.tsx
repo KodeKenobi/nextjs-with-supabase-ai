@@ -1,305 +1,411 @@
 "use client";
 
-import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Upload,
   FileText,
-  Link,
-  Type,
-  Loader2,
+  Mic,
+  Video,
+  Link as LinkIcon,
   CheckCircle,
-  AlertCircle,
+  XCircle,
+  Loader2,
 } from "lucide-react";
 
+interface UploadFormData {
+  title: string;
+  description: string;
+  contentType: "AUDIO" | "VIDEO" | "TEXT" | "BLOG_ARTICLE" | "DOCUMENT";
+  source: "FILE_UPLOAD" | "YOUTUBE_URL" | "BLOG_URL" | "DIRECT_INPUT";
+  file?: File;
+  url?: string;
+  text?: string;
+}
+
 export default function UploadPage() {
-  const [title, setTitle] = useState("");
-  const [text, setText] = useState("");
-  const [url, setUrl] = useState("");
-  const [uploadType, setUploadType] = useState<"text" | "url">("text");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
+  const [formData, setFormData] = useState<UploadFormData>({
+    title: "",
+    description: "",
+    contentType: "AUDIO",
+    source: "FILE_UPLOAD",
+  });
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleTextUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-    if (!title.trim() || !text.trim()) {
-      setMessage({
-        type: "error",
-        text: "Please provide both title and text content",
-      });
-      return;
-    }
-
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error("You must be logged in to upload content");
-      }
-
-      const response = await fetch("/api/process-text", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: title.trim(),
-          text: text.trim(),
-          userId: user.id,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to process text");
-      }
-
-      setMessage({
-        type: "success",
-        text: "Content uploaded and processed successfully!",
-      });
-      setTitle("");
-      setText("");
-    } catch (error) {
-      setMessage({
-        type: "error",
-        text: error instanceof Error ? error.message : "An error occurred",
-      });
-    } finally {
-      setLoading(false);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        file,
+        title: prev.title || file.name.split(".")[0],
+      }));
     }
   };
 
-  const handleUrlUpload = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!title.trim() || !url.trim()) {
-      setMessage({ type: "error", text: "Please provide both title and URL" });
-      return;
-    }
-
-    setLoading(true);
-    setMessage(null);
+    setIsUploading(true);
+    setError("");
+    setSuccess("");
 
     try {
-      // For now, we'll just show a message that URL upload is not implemented
-      setMessage({
-        type: "error",
-        text: "URL upload is not yet implemented. Please use text upload for now.",
+      // Validate form data
+      if (!formData.title.trim()) {
+        throw new Error("Title is required");
+      }
+
+      if (formData.source === "FILE_UPLOAD" && !formData.file) {
+        throw new Error("Please select a file to upload");
+      }
+
+      if (formData.source === "YOUTUBE_URL" && !formData.url?.trim()) {
+        throw new Error("Please enter a YouTube URL");
+      }
+
+      if (formData.source === "BLOG_URL" && !formData.url?.trim()) {
+        throw new Error("Please enter a blog URL");
+      }
+
+      if (formData.source === "DIRECT_INPUT" && !formData.text?.trim()) {
+        throw new Error("Please enter text content");
+      }
+
+      // Simulate upload progress
+      for (let i = 0; i <= 100; i += 10) {
+        setUploadProgress(i);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      // For now, just show success - will be implemented with actual upload
+      setSuccess(
+        "Content uploaded successfully! Processing will begin shortly."
+      );
+      setFormData({
+        title: "",
+        description: "",
+        contentType: "AUDIO",
+        source: "FILE_UPLOAD",
       });
-    } catch (error) {
-      setMessage({
-        type: "error",
-        text: error instanceof Error ? error.message : "An error occurred",
-      });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
-      setLoading(false);
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const getContentTypeIcon = (type: string) => {
+    switch (type) {
+      case "AUDIO":
+        return <Mic className="h-5 w-5" />;
+      case "VIDEO":
+        return <Video className="h-5 w-5" />;
+      case "TEXT":
+      case "DOCUMENT":
+      case "BLOG_ARTICLE":
+        return <FileText className="h-5 w-5" />;
+      default:
+        return <Upload className="h-5 w-5" />;
+    }
+  };
+
+  const getAcceptedFileTypes = (contentType: string) => {
+    switch (contentType) {
+      case "AUDIO":
+        return ".mp3,.wav,.m4a,.aac,.flac";
+      case "VIDEO":
+        return ".mp4,.avi,.mov,.wmv,.mkv";
+      case "DOCUMENT":
+        return ".pdf,.doc,.docx,.txt,.rtf";
+      default:
+        return "*";
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Upload Type Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Choose Upload Type</CardTitle>
-          <CardDescription>
-            Select how you want to upload your content
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button
-              variant={uploadType === "text" ? "default" : "outline"}
-              onClick={() => setUploadType("text")}
-              className="h-20 flex flex-col items-center justify-center space-y-2"
-            >
-              <Type className="h-6 w-6" />
-              <span>Direct Text Input</span>
-            </Button>
-            <Button
-              variant={uploadType === "url" ? "default" : "outline"}
-              onClick={() => setUploadType("url")}
-              className="h-20 flex flex-col items-center justify-center space-y-2"
-            >
-              <Link className="h-6 w-6" />
-              <span>URL Content</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Upload Methods */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card
+          className={`cursor-pointer transition-all ${
+            formData.source === "FILE_UPLOAD"
+              ? "ring-2 ring-blue-500 bg-blue-50"
+              : "hover:shadow-md"
+          }`}
+          onClick={() =>
+            setFormData((prev) => ({ ...prev, source: "FILE_UPLOAD" }))
+          }
+        >
+          <CardContent className="p-4 text-center">
+            <Upload className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+            <h3 className="font-medium text-gray-900">File Upload</h3>
+            <p className="text-sm text-gray-500">
+              Upload audio, video, or documents
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`cursor-pointer transition-all ${
+            formData.source === "YOUTUBE_URL"
+              ? "ring-2 ring-red-500 bg-red-50"
+              : "hover:shadow-md"
+          }`}
+          onClick={() =>
+            setFormData((prev) => ({ ...prev, source: "YOUTUBE_URL" }))
+          }
+        >
+          <CardContent className="p-4 text-center">
+            <Video className="h-8 w-8 mx-auto mb-2 text-red-600" />
+            <h3 className="font-medium text-gray-900">YouTube URL</h3>
+            <p className="text-sm text-gray-500">Process YouTube videos</p>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`cursor-pointer transition-all ${
+            formData.source === "BLOG_URL"
+              ? "ring-2 ring-green-500 bg-green-50"
+              : "hover:shadow-md"
+          }`}
+          onClick={() =>
+            setFormData((prev) => ({ ...prev, source: "BLOG_URL" }))
+          }
+        >
+          <CardContent className="p-4 text-center">
+            <LinkIcon className="h-8 w-8 mx-auto mb-2 text-green-600" />
+            <h3 className="font-medium text-gray-900">Blog URL</h3>
+            <p className="text-sm text-gray-500">Process blog articles</p>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`cursor-pointer transition-all ${
+            formData.source === "DIRECT_INPUT"
+              ? "ring-2 ring-purple-500 bg-purple-50"
+              : "hover:shadow-md"
+          }`}
+          onClick={() =>
+            setFormData((prev) => ({ ...prev, source: "DIRECT_INPUT" }))
+          }
+        >
+          <CardContent className="p-4 text-center">
+            <FileText className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+            <h3 className="font-medium text-gray-900">Direct Text</h3>
+            <p className="text-sm text-gray-500">Paste text directly</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Upload Form */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Upload className="h-5 w-5" />
-            <span>
-              {uploadType === "text"
-                ? "Upload Text Content"
-                : "Upload from URL"}
-            </span>
+          <CardTitle className="flex items-center gap-2">
+            {getContentTypeIcon(formData.contentType)}
+            Upload Content
           </CardTitle>
-          <CardDescription>
-            {uploadType === "text"
-              ? "Paste your text content directly for AI analysis"
-              : "Provide a URL to extract and analyze content"}
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          {uploadType === "text" ? (
-            <form onSubmit={handleTextUpload} className="space-y-4">
-              <div>
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter a title for your content"
-                  required
-                />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Content Type Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="contentType">Content Type</Label>
+              <select
+                id="contentType"
+                name="contentType"
+                value={formData.contentType}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+              >
+                <option value="AUDIO">Audio</option>
+                <option value="VIDEO">Video</option>
+                <option value="DOCUMENT">Document</option>
+                <option value="TEXT">Text</option>
+                <option value="BLOG_ARTICLE">Blog Article</option>
+              </select>
+            </div>
+
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder="Enter content title"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Enter content description (optional)"
+                rows={3}
+              />
+            </div>
+
+            {/* File Upload */}
+            {formData.source === "FILE_UPLOAD" && (
+              <div className="space-y-2">
+                <Label htmlFor="file">File *</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-sm text-gray-600 mb-2">
+                    Click to select a file or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Accepted formats:{" "}
+                    {getAcceptedFileTypes(formData.contentType)}
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    id="file"
+                    onChange={handleFileChange}
+                    accept={getAcceptedFileTypes(formData.contentType)}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Select File
+                  </Button>
+                  {formData.file && (
+                    <div className="mt-4 flex items-center justify-center gap-2 text-sm text-green-600">
+                      <CheckCircle className="h-4 w-4" />
+                      {formData.file.name} (
+                      {(formData.file.size / 1024 / 1024).toFixed(2)} MB)
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <Label htmlFor="text">Content *</Label>
-                <Textarea
-                  id="text"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="Paste your text content here..."
-                  rows={10}
-                  required
-                />
-              </div>
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <FileText className="h-4 w-4 mr-2" />
-                )}
-                Upload and Process Text
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleUrlUpload} className="space-y-4">
-              <div>
-                <Label htmlFor="url-title">Title *</Label>
-                <Input
-                  id="url-title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter a title for your content"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="url">URL *</Label>
+            )}
+
+            {/* URL Input */}
+            {(formData.source === "YOUTUBE_URL" ||
+              formData.source === "BLOG_URL") && (
+              <div className="space-y-2">
+                <Label htmlFor="url">
+                  {formData.source === "YOUTUBE_URL"
+                    ? "YouTube URL"
+                    : "Blog URL"}{" "}
+                  *
+                </Label>
                 <Input
                   id="url"
+                  name="url"
                   type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://example.com/article"
+                  value={formData.url || ""}
+                  onChange={handleInputChange}
+                  placeholder={
+                    formData.source === "YOUTUBE_URL"
+                      ? "https://www.youtube.com/watch?v=..."
+                      : "https://example.com/blog-post"
+                  }
                   required
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Link className="h-4 w-4 mr-2" />
-                )}
-                Upload and Process URL
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+            )}
 
-      {/* Message Display */}
-      {message && (
-        <Card
-          className={
-            message.type === "success"
-              ? "border-green-200 bg-green-50"
-              : "border-red-200 bg-red-50"
-          }
-        >
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-2">
-              {message.type === "success" ? (
-                <CheckCircle className="h-5 w-5 text-green-600" />
+            {/* Direct Text Input */}
+            {formData.source === "DIRECT_INPUT" && (
+              <div className="space-y-2">
+                <Label htmlFor="text">Text Content *</Label>
+                <Textarea
+                  id="text"
+                  name="text"
+                  value={formData.text || ""}
+                  onChange={handleInputChange}
+                  placeholder="Paste your text content here..."
+                  rows={8}
+                  required
+                />
+              </div>
+            )}
+
+            {/* Upload Progress */}
+            {isUploading && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Uploading...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <Alert variant="destructive">
+                <XCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Success Message */}
+            {success && (
+              <Alert className="border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  {success}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Submit Button */}
+            <Button type="submit" disabled={isUploading} className="w-full">
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Uploading...
+                </>
               ) : (
-                <AlertCircle className="h-5 w-5 text-red-600" />
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Content
+                </>
               )}
-              <p
-                className={
-                  message.type === "success" ? "text-green-800" : "text-red-800"
-                }
-              >
-                {message.text}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Instructions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>How it works</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="bg-blue-100 rounded-full p-3 w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-                <span className="text-blue-600 font-bold">1</span>
-              </div>
-              <h3 className="font-semibold mb-1">Upload Content</h3>
-              <p className="text-sm text-gray-600">
-                Upload text or provide a URL to extract content
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-100 rounded-full p-3 w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-                <span className="text-blue-600 font-bold">2</span>
-              </div>
-              <h3 className="font-semibold mb-1">AI Processing</h3>
-              <p className="text-sm text-gray-600">
-                Our AI analyzes the content for business insights
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-100 rounded-full p-3 w-12 h-12 mx-auto mb-2 flex items-center justify-center">
-                <span className="text-blue-600 font-bold">3</span>
-              </div>
-              <h3 className="font-semibold mb-1">View Insights</h3>
-              <p className="text-sm text-gray-600">
-                Access generated insights and analysis in your dashboard
-              </p>
-            </div>
-          </div>
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>

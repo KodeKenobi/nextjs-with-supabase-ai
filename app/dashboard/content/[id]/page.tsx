@@ -1,9 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import DashboardNavigation from "@/components/dashboard/navigation";
-import CompanySearch from "@/components/search/company-search";
+import ContentDetailPage from "@/components/content/content-detail-page";
 
-export default async function CompaniesPage() {
+interface ContentDetailProps {
+  params: {
+    id: string;
+  };
+}
+
+export default async function ContentDetail({ params }: ContentDetailProps) {
   const supabase = await createClient();
 
   const {
@@ -20,13 +26,7 @@ export default async function CompaniesPage() {
       <DashboardNavigation user={user} />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Companies</h1>
-            <p className="mt-2 text-gray-600">
-              Search and manage company information
-            </p>
-          </div>
-          <CompanySearch />
+          <ContentDetailPage contentId={params.id} />
         </div>
       </main>
     </div>

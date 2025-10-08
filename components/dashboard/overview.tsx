@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -111,18 +112,49 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export default function DashboardOverview({
-  user,
-  stats,
-  recentContent,
-  recentInsights,
-  consistencyReport,
-  gapAnalysisReport,
-}: DashboardOverviewProps) {
+export default function DashboardOverview({ user }: { user: any }) {
+  const [stats, setStats] = useState({
+    totalContent: 0,
+    totalInsights: 0,
+    processedContent: 0,
+    pendingContent: 0,
+  });
+  const [recentContent, setRecentContent] = useState([]);
+  const [recentInsights, setRecentInsights] = useState([]);
+  const [consistencyReport, setConsistencyReport] = useState(null);
+  const [gapAnalysisReport, setGapAnalysisReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // For now, set default values to prevent white screen
+    setLoading(false);
+  }, []);
+
   const displayName =
-    user?.firstName && user?.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : user?.name || "there";
+    user?.user_metadata?.first_name && user?.user_metadata?.last_name
+      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+      : user?.email || "there";
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

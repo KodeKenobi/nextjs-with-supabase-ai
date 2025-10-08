@@ -1,38 +1,12 @@
-export type ContentType =
-  | "AUDIO"
-  | "VIDEO"
-  | "BLOG_ARTICLE"
-  | "DOCUMENT"
-  | "TEXT";
-export type ContentSource =
-  | "FILE_UPLOAD"
-  | "YOUTUBE_URL"
-  | "BLOG_URL"
-  | "DIRECT_INPUT";
-export type ProcessingStatus =
-  | "PENDING"
-  | "TRANSCRIBING"
-  | "ANALYZING"
-  | "COMPLETED"
-  | "FAILED";
-export type InsightCategory =
-  | "BUSINESS_MODEL"
-  | "MARKETING"
-  | "OPERATIONS"
-  | "FINANCIAL"
-  | "STRATEGIC"
-  | "CUSTOMER"
-  | "PRODUCT"
-  | "COMPETITIVE"
-  | "RISKS"
-  | "OPPORTUNITIES";
-export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-export type CompanyType =
-  | "SUPPLIER"
-  | "COMPETITOR"
-  | "PARTNER"
-  | "TARGET"
-  | "CUSTOMER";
+export interface User {
+  id: string;
+  email?: string;
+  user_metadata?: {
+    first_name?: string;
+    last_name?: string;
+    company_name?: string;
+  };
+}
 
 export interface Company {
   id: string;
@@ -45,7 +19,7 @@ export interface Company {
   headquarters?: string;
   country?: string;
   size?: string;
-  type: CompanyType;
+  type?: "SUPPLIER" | "COMPETITOR" | "PARTNER" | "TARGET" | "CUSTOMER";
   revenue?: string;
   market_cap?: string;
   employee_count?: string;
@@ -113,7 +87,7 @@ export interface Company {
   swot_analysis?: any;
   risk_factors?: any;
   growth_strategy?: string;
-  investment_thesis?: string;
+  investment_thesis?: any;
   due_diligence_notes?: any;
   created_at: string;
   updated_at: string;
@@ -123,15 +97,15 @@ export interface ContentItem {
   id: string;
   title: string;
   description?: string;
-  content_type: ContentType;
-  source: ContentSource;
+  content_type: "AUDIO" | "VIDEO" | "BLOG_ARTICLE" | "DOCUMENT" | "TEXT";
+  source: "FILE_UPLOAD" | "YOUTUBE_URL" | "BLOG_URL" | "DIRECT_INPUT";
   source_url?: string;
   cloud_storage_path?: string;
   file_name?: string;
   file_size?: number;
   mime_type?: string;
   duration?: number;
-  status: ProcessingStatus;
+  status: "PENDING" | "TRANSCRIBING" | "ANALYZING" | "COMPLETED" | "FAILED";
   company_id?: string;
   user_id: string;
   created_at: string;
@@ -152,11 +126,21 @@ export interface Transcription {
 
 export interface BusinessInsight {
   id: string;
-  category: InsightCategory;
+  category:
+    | "BUSINESS_MODEL"
+    | "MARKETING"
+    | "OPERATIONS"
+    | "FINANCIAL"
+    | "STRATEGIC"
+    | "CUSTOMER"
+    | "PRODUCT"
+    | "COMPETITIVE"
+    | "RISKS"
+    | "OPPORTUNITIES";
   title: string;
   content: string;
   confidence?: number;
-  priority: Priority;
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   tags?: string;
   source_quote?: string;
   company_id?: string;
@@ -188,4 +172,11 @@ export interface GapAnalysisReport {
   user_id: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface DashboardStats {
+  totalContent: number;
+  totalInsights: number;
+  processedContent: number;
+  pendingContent: number;
 }
