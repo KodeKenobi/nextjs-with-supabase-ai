@@ -45,7 +45,7 @@ interface ContentItem {
   title: string;
   contentType: string;
   status: string;
-  createdAt: Date;
+  createdAt: string;
   transcription?: {
     id: string;
     content: string;
@@ -64,7 +64,7 @@ interface Insight {
   category: string;
   title: string;
   priority: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 interface Report {
@@ -73,7 +73,7 @@ interface Report {
   totalContradictions?: number;
   totalGaps?: number;
   priorityGaps?: number;
-  createdAt: Date;
+  createdAt: string;
 }
 
 const getPriorityColor = (priority: string) => {
@@ -109,7 +109,7 @@ const getStatusColor = (status: string) => {
 };
 
 export default function DashboardOverview({ user }: { user: User }) {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<Stats>({
     totalContent: 0,
     totalInsights: 0,
     processedContent: 0,
@@ -117,12 +117,8 @@ export default function DashboardOverview({ user }: { user: User }) {
   });
   const [recentContent, setRecentContent] = useState<ContentItem[]>([]);
   const [recentInsights, setRecentInsights] = useState<Insight[]>([]);
-  const [consistencyReport, setConsistencyReport] = useState<Report | null>(
-    null
-  );
-  const [gapAnalysisReport, setGapAnalysisReport] = useState<Report | null>(
-    null
-  );
+  const [consistencyReport, setConsistencyReport] = useState<Report | null>(null);
+  const [gapAnalysisReport, setGapAnalysisReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -157,11 +153,11 @@ export default function DashboardOverview({ user }: { user: User }) {
       const totalContent = contentData.length || 0;
       const totalInsights = insightsData.length || 0;
       const processedContent =
-        contentData.filter((item: ContentItem) => item.status === "COMPLETED")
-          .length || 0;
+        contentData.filter((item: ContentItem) => item.status === "COMPLETED").length ||
+        0;
       const pendingContent =
-        contentData.filter((item: ContentItem) => item.status === "PENDING")
-          .length || 0;
+        contentData.filter((item: ContentItem) => item.status === "PENDING").length ||
+        0;
 
       setStats({
         totalContent,
@@ -192,7 +188,9 @@ export default function DashboardOverview({ user }: { user: User }) {
   const displayName =
     user?.user_metadata?.first_name && user?.user_metadata?.last_name
       ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
-      : user?.email || "there";
+      : user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.name || "there";
 
   if (loading) {
     return (
@@ -245,21 +243,21 @@ export default function DashboardOverview({ user }: { user: User }) {
           </CardContent>
         </Card>
 
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <Brain className="h-8 w-8 text-purple-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">
-                      AI Insights
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {stats.totalInsights}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Brain className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  AI Insights
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.totalInsights}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
@@ -275,19 +273,19 @@ export default function DashboardOverview({ user }: { user: User }) {
           </CardContent>
         </Card>
 
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <Clock className="h-8 w-8 text-orange-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Processing</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {stats.pendingContent}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Clock className="h-8 w-8 text-orange-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Processing</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.pendingContent}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Actions */}
