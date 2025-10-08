@@ -198,6 +198,7 @@ export default function DashboardNavigation({ user }: NavigationProps) {
                     ? `${firstName} ${lastName}`
                     : user?.email || "User"}
                 </p>
+                <p className="text-sm text-gray-500">{user?.email}</p>
                 {companyName && (
                   <p className="text-sm text-gray-500">{companyName}</p>
                 )}

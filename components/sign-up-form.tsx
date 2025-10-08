@@ -1,8 +1,12 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -10,27 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Eye,
-  EyeOff,
-  Brain,
-  Mail,
-  Lock,
-  User,
-  Building,
-  Loader2,
-} from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Brain, Mail, Lock, User, Building, Loader2 } from "lucide-react";
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function SignUpForm() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -39,9 +26,7 @@ export function SignUpForm({
     lastName: "",
     companyName: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -52,10 +37,10 @@ export function SignUpForm({
     }));
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -111,7 +96,7 @@ export function SignUpForm({
   };
 
   return (
-    <div className={cn("max-w-md mx-auto px-4", className)} {...props}>
+    <div className="max-w-md mx-auto px-4">
       <div className="text-center mb-8">
         <div className="flex justify-center mb-4">
           <Brain className="h-12 w-12 text-blue-600" />
@@ -128,7 +113,7 @@ export function SignUpForm({
           <CardDescription>Create your account to get started</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
@@ -199,24 +184,13 @@ export function SignUpForm({
                 <Input
                   id="password"
                   name="password"
-                  type={showPassword ? "text" : "password"}
+                  type="password"
                   placeholder="Create a password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="pl-10 pr-10"
+                  className="pl-10"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
               </div>
             </div>
 
@@ -227,24 +201,13 @@ export function SignUpForm({
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type="password"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="pl-10 pr-10"
+                  className="pl-10"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
               </div>
             </div>
 
