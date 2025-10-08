@@ -41,9 +41,9 @@ export function LoginForm() {
       } else {
         router.replace("/dashboard");
       }
-    } catch (error) {
-      setError("Something went wrong. Please try again.");
-    } finally {
+        } catch {
+          setError("Something went wrong. Please try again.");
+        } finally {
       setIsLoading(false);
     }
   };

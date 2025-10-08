@@ -9,9 +9,6 @@ import {
   Search,
   AlertTriangle,
   CheckCircle,
-  Clock,
-  Calendar,
-  Play,
   FileText,
   Brain,
   RefreshCw,
@@ -58,12 +55,12 @@ export default function ConsistencyPage() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch('/api/consistency');
+      const response = await fetch("/api/consistency");
       if (response.ok) {
         const data = await response.json();
         setReports(data);
       } else {
-        console.error('Failed to fetch consistency reports');
+        console.error("Failed to fetch consistency reports");
         setReports([]);
       }
     } catch (error) {
@@ -81,7 +78,7 @@ export default function ConsistencyPage() {
     try {
       // Simulate running consistency check
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      
+
       // Add new report
       const newReport: ConsistencyReport = {
         id: Date.now().toString(),
@@ -92,9 +89,9 @@ export default function ConsistencyPage() {
         created_at: new Date().toISOString(),
         status: "COMPLETED",
       };
-      
+
       setReports((prev) => [newReport, ...prev]);
-    } catch (err) {
+    } catch {
       setError("Failed to run consistency check");
     } finally {
       setIsRunning(false);
@@ -271,8 +268,10 @@ export default function ConsistencyPage() {
                         </span>
                       </div>
                       <p className="text-2xl font-bold text-gray-900 mt-1">
-                        {new Set(report.contradictions.map((c) => c.category))
-                          .size}
+                        {
+                          new Set(report.contradictions.map((c) => c.category))
+                            .size
+                        }
                       </p>
                     </div>
                   </div>
@@ -296,7 +295,9 @@ export default function ConsistencyPage() {
                               </span>
                             </div>
                             <Badge
-                              className={getSeverityColor(contradiction.severity)}
+                              className={getSeverityColor(
+                                contradiction.severity
+                              )}
                             >
                               {contradiction.severity}
                             </Badge>

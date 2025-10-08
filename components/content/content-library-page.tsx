@@ -50,12 +50,12 @@ export default function ContentLibraryPage() {
 
   const fetchContent = async () => {
     try {
-      const response = await fetch('/api/content');
+      const response = await fetch("/api/content");
       if (response.ok) {
         const data = await response.json();
         setContent(data);
       } else {
-        console.error('Failed to fetch content');
+        console.error("Failed to fetch content");
         setContent([]);
       }
     } catch (error) {

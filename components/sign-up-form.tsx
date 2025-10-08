@@ -88,8 +88,8 @@ export function SignUpForm() {
         const data = await response.json();
         setError(data.error || "Something went wrong");
       }
-    } catch (error) {
-      setError("Something went wrong. Please try again.");
+        } catch {
+          setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -175,7 +175,7 @@ export function SignUpForm() {
                   required
                 />
               </div>
-            </div>
+                </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password *</Label>
@@ -192,7 +192,7 @@ export function SignUpForm() {
                   required
                 />
               </div>
-            </div>
+                </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password *</Label>
@@ -233,7 +233,7 @@ export function SignUpForm() {
                 Sign in
               </Link>
             </p>
-          </div>
+            </div>
         </CardContent>
       </Card>
     </div>

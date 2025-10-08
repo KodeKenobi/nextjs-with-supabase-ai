@@ -9,8 +9,6 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Clock,
-  Calendar,
   Target,
   Brain,
   RefreshCw,
@@ -58,12 +56,12 @@ export default function GapAnalysisPage() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch('/api/gaps');
+      const response = await fetch("/api/gaps");
       if (response.ok) {
         const data = await response.json();
         setReports(data);
       } else {
-        console.error('Failed to fetch gap analysis reports');
+        console.error("Failed to fetch gap analysis reports");
         setReports([]);
       }
     } catch (error) {
@@ -95,7 +93,7 @@ export default function GapAnalysisPage() {
       };
 
       setReports((prev) => [newReport, ...prev]);
-    } catch (err) {
+    } catch {
       setError("Failed to run gap analysis");
     } finally {
       setIsRunning(false);
@@ -345,7 +343,9 @@ export default function GapAnalysisPage() {
                                 Priority:
                               </span>
                               <Badge
-                                className={`ml-2 ${getPriorityColor(gap.priority)}`}
+                                className={`ml-2 ${getPriorityColor(
+                                  gap.priority
+                                )}`}
                               >
                                 {gap.priority}
                               </Badge>

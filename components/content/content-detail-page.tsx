@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert } from "@/components/ui/alert";
 import {
   FileText,
   Video,
@@ -18,7 +18,6 @@ import {
   Clock,
   Brain,
   AlertTriangle,
-  CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -63,11 +62,7 @@ export default function ContentDetailPage({
   const [error, setError] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
 
-  useEffect(() => {
-    fetchContent();
-  }, [contentId]);
-
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
     try {
       // For now, return mock data - will be implemented with Supabase
       setContent({
@@ -117,7 +112,11 @@ export default function ContentDetailPage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [contentId]);
+
+  useEffect(() => {
+    fetchContent();
+  }, [fetchContent]);
 
   const getContentIcon = (type: string) => {
     switch (type?.toLowerCase()) {

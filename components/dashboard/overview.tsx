@@ -26,6 +26,11 @@ interface User {
   firstName?: string | null;
   lastName?: string | null;
   companyName?: string | null;
+  user_metadata?: {
+    first_name?: string;
+    last_name?: string;
+    company_name?: string;
+  };
 }
 
 interface Stats {
@@ -71,15 +76,6 @@ interface Report {
   createdAt: Date;
 }
 
-interface DashboardOverviewProps {
-  user: User;
-  stats: Stats;
-  recentContent: ContentItem[];
-  recentInsights: Insight[];
-  consistencyReport: Report | null;
-  gapAnalysisReport: Report | null;
-}
-
 const getPriorityColor = (priority: string) => {
   switch (priority?.toLowerCase()) {
     case "critical":
@@ -112,17 +108,21 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export default function DashboardOverview({ user }: { user: any }) {
+export default function DashboardOverview({ user }: { user: User }) {
   const [stats, setStats] = useState({
     totalContent: 0,
     totalInsights: 0,
     processedContent: 0,
     pendingContent: 0,
   });
-  const [recentContent, setRecentContent] = useState([]);
-  const [recentInsights, setRecentInsights] = useState([]);
-  const [consistencyReport, setConsistencyReport] = useState(null);
-  const [gapAnalysisReport, setGapAnalysisReport] = useState(null);
+  const [recentContent, setRecentContent] = useState<ContentItem[]>([]);
+  const [recentInsights, setRecentInsights] = useState<Insight[]>([]);
+  const [consistencyReport, setConsistencyReport] = useState<Report | null>(
+    null
+  );
+  const [gapAnalysisReport, setGapAnalysisReport] = useState<Report | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -132,26 +132,36 @@ export default function DashboardOverview({ user }: { user: any }) {
   const fetchDashboardData = async () => {
     try {
       // Fetch content items
-      const contentResponse = await fetch('/api/content');
-      const contentData = contentResponse.ok ? await contentResponse.json() : [];
-      
+      const contentResponse = await fetch("/api/content");
+      const contentData = contentResponse.ok
+        ? await contentResponse.json()
+        : [];
+
       // Fetch business insights
-      const insightsResponse = await fetch('/api/insights');
-      const insightsData = insightsResponse.ok ? await insightsResponse.json() : [];
-      
+      const insightsResponse = await fetch("/api/insights");
+      const insightsData = insightsResponse.ok
+        ? await insightsResponse.json()
+        : [];
+
       // Fetch consistency reports
-      const consistencyResponse = await fetch('/api/consistency');
-      const consistencyData = consistencyResponse.ok ? await consistencyResponse.json() : [];
-      
+      const consistencyResponse = await fetch("/api/consistency");
+      const consistencyData = consistencyResponse.ok
+        ? await consistencyResponse.json()
+        : [];
+
       // Fetch gap analysis reports
-      const gapsResponse = await fetch('/api/gaps');
+      const gapsResponse = await fetch("/api/gaps");
       const gapsData = gapsResponse.ok ? await gapsResponse.json() : [];
 
       // Calculate stats
       const totalContent = contentData.length || 0;
       const totalInsights = insightsData.length || 0;
-      const processedContent = contentData.filter((item: any) => item.status === 'COMPLETED').length || 0;
-      const pendingContent = contentData.filter((item: any) => item.status === 'PENDING').length || 0;
+      const processedContent =
+        contentData.filter((item: ContentItem) => item.status === "COMPLETED")
+          .length || 0;
+      const pendingContent =
+        contentData.filter((item: ContentItem) => item.status === "PENDING")
+          .length || 0;
 
       setStats({
         totalContent,
@@ -161,12 +171,12 @@ export default function DashboardOverview({ user }: { user: any }) {
       });
 
       // Set recent data (last 5 items)
-      setRecentContent(contentData.slice(0, 5) || []);
-      setRecentInsights(insightsData.slice(0, 5) || []);
-      setConsistencyReport(consistencyData[0] || null);
-      setGapAnalysisReport(gapsData[0] || null);
+      setRecentContent((contentData as ContentItem[]).slice(0, 5) || []);
+      setRecentInsights((insightsData as Insight[]).slice(0, 5) || []);
+      setConsistencyReport((consistencyData as Report[])[0] || null);
+      setGapAnalysisReport((gapsData as Report[])[0] || null);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error("Error fetching dashboard data:", error);
       // Set default values on error
       setStats({
         totalContent: 0,

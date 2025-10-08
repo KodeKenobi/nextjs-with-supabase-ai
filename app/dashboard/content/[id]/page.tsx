@@ -4,12 +4,13 @@ import DashboardNavigation from "@/components/dashboard/navigation";
 import ContentDetailPage from "@/components/content/content-detail-page";
 
 interface ContentDetailProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function ContentDetail({ params }: ContentDetailProps) {
+  const { id } = await params;
   const supabase = await createClient();
 
   const {
@@ -26,7 +27,7 @@ export default async function ContentDetail({ params }: ContentDetailProps) {
       <DashboardNavigation user={user} />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <ContentDetailPage contentId={params.id} />
+          <ContentDetailPage contentId={id} />
         </div>
       </main>
     </div>

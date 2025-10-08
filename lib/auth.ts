@@ -51,18 +51,18 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
-        token.companyName = user.companyName;
+        token.firstName = (user as any).firstName;
+        token.lastName = (user as any).lastName;
+        token.companyName = (user as any).companyName;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.firstName = token.firstName as string;
-        session.user.lastName = token.lastName as string;
-        session.user.companyName = token.companyName as string;
+        (session.user as any).id = token.id as string;
+        (session.user as any).firstName = token.firstName as string;
+        (session.user as any).lastName = token.lastName as string;
+        (session.user as any).companyName = token.companyName as string;
       }
       return session;
     },

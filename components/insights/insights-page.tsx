@@ -46,12 +46,12 @@ export default function InsightsPage() {
 
   const fetchInsights = async () => {
     try {
-      const response = await fetch('/api/insights');
+      const response = await fetch("/api/insights");
       if (response.ok) {
         const data = await response.json();
         setInsights(data);
       } else {
-        console.error('Failed to fetch insights');
+        console.error("Failed to fetch insights");
         setInsights([]);
       }
     } catch (error) {

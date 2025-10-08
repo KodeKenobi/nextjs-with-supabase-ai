@@ -5,13 +5,14 @@ import LandingPage from "@/components/landing-page";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { code?: string };
+  searchParams: Promise<{ code?: string }>;
 }) {
   const supabase = await createClient();
+  const resolvedSearchParams = await searchParams;
 
   // Check if this is an email confirmation redirect
-  if (searchParams.code) {
-    redirect(`/auth/confirm?code=${searchParams.code}`);
+  if (resolvedSearchParams.code) {
+    redirect(`/auth/confirm?code=${resolvedSearchParams.code}`);
   }
 
   // Check if user is authenticated
