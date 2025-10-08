@@ -245,21 +245,21 @@ export default function DashboardOverview({ user }: { user: User }) {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Brain className="h-8 w-8 text-purple-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Total Insights
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.totalInsights}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <Brain className="h-8 w-8 text-purple-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">
+                      AI Insights
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {stats.totalInsights}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
@@ -275,19 +275,19 @@ export default function DashboardOverview({ user }: { user: User }) {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Clock className="h-8 w-8 text-orange-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.pendingContent}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <Clock className="h-8 w-8 text-orange-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Processing</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {stats.pendingContent}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
       </div>
 
       {/* Quick Actions */}
@@ -307,16 +307,16 @@ export default function DashboardOverview({ user }: { user: User }) {
                   Upload Content
                 </Button>
               </Link>
-              <Link href="/dashboard/companies">
+              <Link href="/dashboard/consistency">
                 <Button variant="outline" className="w-full justify-start">
                   <Search className="h-4 w-4 mr-2" />
-                  Search Companies
+                  Check Consistency
                 </Button>
               </Link>
-              <Link href="/dashboard/insights">
+              <Link href="/dashboard/gaps">
                 <Button variant="outline" className="w-full justify-start">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  View Insights
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Gap Analysis
                 </Button>
               </Link>
             </div>
