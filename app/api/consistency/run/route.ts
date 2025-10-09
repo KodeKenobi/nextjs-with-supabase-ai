@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient();
 
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function analyzeConsistency(contentItems: any[]) {
+async function analyzeConsistency(contentItems: unknown[]) {
   // This would integrate with AI for actual consistency analysis
   // For now, return mock contradictions
   const contradictions = [];
@@ -92,7 +92,7 @@ async function analyzeConsistency(contentItems: any[]) {
     .map((item) => {
       const transcription = item.transcriptions?.[0]?.content || "";
       const insights =
-        item.business_insights?.map((i: any) => i.content).join(" ") || "";
+         item.business_insights?.map((i: unknown) => (i as { content: string }).content).join(" ") || "";
       return `${item.title} ${item.description} ${transcription} ${insights}`.toLowerCase();
     })
     .join(" ");
@@ -131,7 +131,7 @@ async function analyzeConsistency(contentItems: any[]) {
               pattern.negative.some((word) => text.includes(word))
             );
           })
-          .map((item) => ({ id: item.id, title: item.title })),
+           .map((item) => ({ id: (item as { id: string }).id, title: (item as { title: string }).title })),
       });
     }
   });

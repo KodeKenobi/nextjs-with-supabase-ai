@@ -225,7 +225,7 @@ export default function DashboardOverview({ user }: { user: User }) {
           Welcome back, {displayName}!
         </h1>
         <p className="mt-2 text-gray-600">
-          Here's what's happening with your content repository
+          Here&apos;s what&apos;s happening with your content repository
         </p>
       </div>
 

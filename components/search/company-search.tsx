@@ -111,7 +111,7 @@ export default function CompanySearch() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">
-              Search Results for "{results.query}"
+              Search Results for &ldquo;{results.query}&rdquo;
             </h2>
             <span className="text-sm text-gray-500">
               {results.companies.length} companies found

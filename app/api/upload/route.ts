@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Handle file upload
     let cloudStoragePath = null;
-    let fileName = null;
+    let fileName: string | null = null;
     let fileSize = null;
     let mimeType = null;
 
@@ -158,13 +158,11 @@ async function processTextContent(
 
 async function processFileContent(
   contentId: string,
-  filePath: string,
-  userId: string
+  _filePath: string,
+  _userId: string
 ) {
   // This would integrate with transcription services and AI analysis
   // For now, just update status
-  const supabase = await createClient();
-
   await supabaseAdmin
     .from("content_items")
     .update({

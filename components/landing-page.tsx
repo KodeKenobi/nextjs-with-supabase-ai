@@ -127,7 +127,7 @@ export default function LandingPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-blue-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-white mb-6">
-            Ready to Unlock Your Content's Potential?
+            Ready to Unlock Your Content&apos;s Potential?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
             Join businesses using AI to transform their content into actionable insights.

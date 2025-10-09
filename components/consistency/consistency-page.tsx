@@ -88,8 +88,8 @@ export default function ConsistencyPage() {
         throw new Error(errorData.error || "Failed to run consistency check");
       }
 
-      const data = await response.json();
-
+      // const data = await response.json();
+      
       // Refresh reports list
       await fetchReports();
     } catch (err) {
@@ -312,7 +312,7 @@ export default function ConsistencyPage() {
                                 Statement 1:
                               </p>
                               <p className="text-sm text-gray-600 bg-white p-2 rounded border-l-4 border-blue-500">
-                                "{contradiction.content1}"
+                                &ldquo;{contradiction.content1}&rdquo;
                               </p>
                               <p className="text-xs text-gray-500 mt-1">
                                 From: {contradiction.source1.title} (
@@ -325,7 +325,7 @@ export default function ConsistencyPage() {
                                 Contradicts with:
                               </p>
                               <p className="text-sm text-gray-600 bg-white p-2 rounded border-l-4 border-red-500">
-                                "{contradiction.content2}"
+                                &ldquo;{contradiction.content2}&rdquo;
                               </p>
                               <p className="text-xs text-gray-500 mt-1">
                                 From: {contradiction.source2.title} (

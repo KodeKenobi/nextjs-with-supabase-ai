@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function DebugUsers() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchUsers = async () => {
@@ -39,25 +39,37 @@ export function DebugUsers() {
         {users.length > 0 && (
           <div className="space-y-2">
             <h3 className="font-semibold">Users ({users.length} total):</h3>
-            {users.map((user, index) => (
-              <div key={user.id} className="p-3 border rounded bg-gray-50">
-                <div className="font-medium">{user.email}</div>
-                <div className="text-sm text-gray-600">
-                  ID: {user.id} | Created: {new Date(user.createdAt).toLocaleString()}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Last Sign In: {user.lastSignIn ? new Date(user.lastSignIn).toLocaleString() : 'Never'}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Email Confirmed: {user.emailConfirmed ? 'Yes' : 'No'}
-                </div>
-                {(user.firstName || user.lastName || user.companyName) && (
+                   {users.map((user) => {
+              const userData = user as {
+                id: string;
+                email: string;
+                createdAt: string;
+                lastSignIn?: string;
+                emailConfirmed?: string;
+                firstName?: string;
+                lastName?: string;
+                companyName?: string;
+              };
+              return (
+                <div key={userData.id} className="p-3 border rounded bg-gray-50">
+                  <div className="font-medium">{userData.email}</div>
                   <div className="text-sm text-gray-600">
-                    Name: {user.firstName} {user.lastName} | Company: {user.companyName}
+                    ID: {userData.id} | Created: {new Date(userData.createdAt).toLocaleString()}
                   </div>
-                )}
-              </div>
-            ))}
+                  <div className="text-sm text-gray-600">
+                    Last Sign In: {userData.lastSignIn ? new Date(userData.lastSignIn).toLocaleString() : 'Never'}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Email Confirmed: {userData.emailConfirmed ? 'Yes' : 'No'}
+                  </div>
+                  {(userData.firstName || userData.lastName || userData.companyName) && (
+                    <div className="text-sm text-gray-600">
+                      Name: {userData.firstName} {userData.lastName} | Company: {userData.companyName}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </CardContent>

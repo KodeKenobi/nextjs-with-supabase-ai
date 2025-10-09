@@ -89,8 +89,8 @@ export default function GapAnalysisPage() {
         throw new Error(errorData.error || "Failed to run gap analysis");
       }
 
-      const data = await response.json();
-
+      // const data = await response.json();
+      
       // Refresh reports list
       await fetchReports();
     } catch (err) {

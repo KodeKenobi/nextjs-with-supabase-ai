@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient();
 
@@ -55,9 +55,9 @@ export async function POST(request: NextRequest) {
         description: "Automated gap analysis of content strategy",
         gaps: gaps,
         total_gaps: gaps.length,
-        priority_gaps: gaps.filter(
-          (gap: any) => gap.priority === "HIGH" || gap.priority === "CRITICAL"
-        ).length,
+         priority_gaps: gaps.filter(
+           (gap: unknown) => (gap as { priority: string }).priority === "HIGH" || (gap as { priority: string }).priority === "CRITICAL"
+         ).length,
         recommendations: generateRecommendations(gaps),
         user_id: user.id,
       })
@@ -86,19 +86,19 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function analyzeGaps(contentItems: any[]) {
+async function analyzeGaps(contentItems: unknown[]) {
   // This would integrate with AI for actual gap analysis
   // For now, return mock gaps based on content analysis
 
   const gaps = [];
   const allCategories = new Set();
-  const allTopics = new Set();
+  // const allTopics = new Set();
 
   // Analyze existing content
   contentItems.forEach((item) => {
     if (item.business_insights) {
-      item.business_insights.forEach((insight: any) => {
-        allCategories.add(insight.category);
+       item.business_insights.forEach((insight: unknown) => {
+         allCategories.add((insight as { category: string }).category);
       });
     }
   });
@@ -188,7 +188,7 @@ function getPriorityForCategory(category: string): string {
   return "LOW";
 }
 
-function generateRecommendations(gaps: any[]): string[] {
+function generateRecommendations(gaps: unknown[]): string[] {
   const recommendations = [];
 
   if (gaps.length > 0) {
