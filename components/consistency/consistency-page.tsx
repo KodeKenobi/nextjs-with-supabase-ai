@@ -76,23 +76,26 @@ export default function ConsistencyPage() {
     setError("");
 
     try {
-      // Simulate running consistency check
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const response = await fetch("/api/consistency/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      // Add new report
-      const newReport: ConsistencyReport = {
-        id: Date.now().toString(),
-        title: `Consistency Check - ${new Date().toLocaleDateString()}`,
-        description: "Latest consistency analysis of all content",
-        total_contradictions: 0,
-        contradictions: [],
-        created_at: new Date().toISOString(),
-        status: "COMPLETED",
-      };
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to run consistency check");
+      }
 
-      setReports((prev) => [newReport, ...prev]);
-    } catch {
-      setError("Failed to run consistency check");
+      const data = await response.json();
+
+      // Refresh reports list
+      await fetchReports();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to run consistency check"
+      );
     } finally {
       setIsRunning(false);
     }

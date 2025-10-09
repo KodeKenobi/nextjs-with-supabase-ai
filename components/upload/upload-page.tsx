@@ -92,13 +92,41 @@ export default function UploadPage() {
         throw new Error("Please enter text content");
       }
 
+      // Create form data for API
+      const uploadFormData = new FormData();
+      uploadFormData.append("title", formData.title);
+      uploadFormData.append("description", formData.description || "");
+      uploadFormData.append("contentType", formData.contentType);
+      uploadFormData.append("source", formData.source);
+
+      if (formData.file) {
+        uploadFormData.append("file", formData.file);
+      }
+      if (formData.url) {
+        uploadFormData.append("url", formData.url);
+      }
+      if (formData.text) {
+        uploadFormData.append("text", formData.text);
+      }
+
       // Simulate upload progress
-      for (let i = 0; i <= 100; i += 10) {
+      for (let i = 0; i <= 90; i += 10) {
         setUploadProgress(i);
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      // For now, just show success - will be implemented with actual upload
+      // Upload to API
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      setUploadProgress(100);
       setSuccess(
         "Content uploaded successfully! Processing will begin shortly."
       );

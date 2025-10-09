@@ -77,24 +77,26 @@ export default function GapAnalysisPage() {
     setError("");
 
     try {
-      // Simulate running gap analysis
-      await new Promise((resolve) => setTimeout(resolve, 4000));
+      const response = await fetch("/api/gaps/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      // Add new report
-      const newReport: GapAnalysisReport = {
-        id: Date.now().toString(),
-        title: `Gap Analysis - ${new Date().toLocaleDateString()}`,
-        description: "Latest gap analysis of content strategy",
-        total_gaps: 0,
-        priority_gaps: 0,
-        gaps: [],
-        created_at: new Date().toISOString(),
-        status: "COMPLETED",
-      };
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to run gap analysis");
+      }
 
-      setReports((prev) => [newReport, ...prev]);
-    } catch {
-      setError("Failed to run gap analysis");
+      const data = await response.json();
+
+      // Refresh reports list
+      await fetchReports();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to run gap analysis"
+      );
     } finally {
       setIsRunning(false);
     }
