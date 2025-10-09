@@ -23,7 +23,10 @@ export default async function DashboardPage() {
     lastName: user.user_metadata?.last_name,
     companyName: user.user_metadata?.company_name,
     confirmedAt: user.email_confirmed_at,
-    createdAt: user.created_at
+    createdAt: user.created_at,
+    lastSignIn: user.last_sign_in_at,
+    timestamp: new Date().toISOString(),
+    sessionId: user.app_metadata?.provider_id || 'unknown'
   });
 
   return (

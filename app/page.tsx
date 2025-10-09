@@ -22,10 +22,18 @@ export default async function Home({
 
   // Redirect to dashboard if user is logged in
   if (user) {
-    console.log("🏠 Home page: Redirecting authenticated user to dashboard:", user.email);
+    console.log("🏠 Home page: Redirecting authenticated user to dashboard:", {
+      email: user.email,
+      userId: user.id,
+      timestamp: new Date().toISOString(),
+      lastSignIn: user.last_sign_in_at,
+      confirmedAt: user.email_confirmed_at
+    });
     redirect("/dashboard");
   } else {
-    console.log("🏠 Home page: No authenticated user, showing landing page");
+    console.log("🏠 Home page: No authenticated user, showing landing page", {
+      timestamp: new Date().toISOString()
+    });
   }
 
   // Show the beautiful landing page for non-authenticated users

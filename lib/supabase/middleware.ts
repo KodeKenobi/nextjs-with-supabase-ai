@@ -52,10 +52,23 @@ export async function updateSession(request: NextRequest) {
     console.log("🔐 Middleware: Authenticated user accessing", request.nextUrl.pathname, {
       userId: user.sub,
       email: user.email,
-      path: request.nextUrl.pathname
+      path: request.nextUrl.pathname,
+      timestamp: new Date().toISOString(),
+      userAgent: request.headers.get('user-agent'),
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+      referer: request.headers.get('referer'),
+      host: request.headers.get('host'),
+      method: request.method
     });
   } else {
-    console.log("🚫 Middleware: No authenticated user for", request.nextUrl.pathname);
+    console.log("🚫 Middleware: No authenticated user for", request.nextUrl.pathname, {
+      timestamp: new Date().toISOString(),
+      userAgent: request.headers.get('user-agent'),
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+      referer: request.headers.get('referer'),
+      host: request.headers.get('host'),
+      method: request.method
+    });
   }
 
   if (

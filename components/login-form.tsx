@@ -37,10 +37,25 @@ export function LoginForm() {
       });
 
       if (error) {
-        console.log("❌ Login failed:", error.message);
+        console.log("❌ Login failed:", {
+          email,
+          error: error.message,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          url: window.location.href
+        });
         setError("Invalid email or password");
       } else {
-        console.log("✅ Login successful for:", email);
+        console.log("✅ Login successful:", {
+          email,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          url: window.location.href,
+          referrer: document.referrer,
+          screenResolution: `${screen.width}x${screen.height}`,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          language: navigator.language
+        });
         router.replace("/dashboard");
       }
         } catch {

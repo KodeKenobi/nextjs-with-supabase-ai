@@ -10,7 +10,15 @@ export function LogoutButton() {
   const logout = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    console.log("👋 User logging out:", user?.email);
+    console.log("👋 User logging out:", {
+      email: user?.email,
+      userId: user?.id,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      sessionDuration: user?.last_sign_in_at ? 
+        Math.round((Date.now() - new Date(user.last_sign_in_at).getTime()) / 1000 / 60) + ' minutes' : 'unknown'
+    });
     await supabase.auth.signOut();
     router.push("/auth/login");
   };

@@ -70,12 +70,29 @@ export function SignUpForm() {
       });
 
       if (response.ok) {
-        console.log("✅ Account created successfully for:", formData.email);
+        console.log("✅ Account created successfully:", {
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          companyName: formData.companyName,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          url: window.location.href,
+          referrer: document.referrer,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          language: navigator.language
+        });
         // Redirect to success page - user needs to confirm email first
         router.replace("/auth/sign-up-success");
       } else {
         const data = await response.json();
-        console.log("❌ Account creation failed:", data.error);
+        console.log("❌ Account creation failed:", {
+          email: formData.email,
+          error: data.error,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          url: window.location.href
+        });
         setError(data.error || "Something went wrong");
       }
     } catch {
