@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
 
   // Log authentication status
   if (user) {
-    console.log("🔐 Middleware: Authenticated user accessing", request.nextUrl.pathname, {
+    console.log("🔐 Middleware: AUTHENTICATED user accessing", request.nextUrl.pathname, {
       userId: user.sub,
       email: user.email,
       path: request.nextUrl.pathname,
@@ -61,7 +61,7 @@ export async function updateSession(request: NextRequest) {
       method: request.method
     });
   } else {
-    console.log("🚫 Middleware: No authenticated user for", request.nextUrl.pathname, {
+    console.log("🚫 Middleware: NO AUTHENTICATED USER for", request.nextUrl.pathname, {
       timestamp: new Date().toISOString(),
       userAgent: request.headers.get('user-agent'),
       ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
@@ -71,14 +71,18 @@ export async function updateSession(request: NextRequest) {
     });
   }
 
+  // SECURITY CHECK: Block access to protected routes without valid authentication
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&
     !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
+    !request.nextUrl.pathname.startsWith("/auth") &&
+    !request.nextUrl.pathname.startsWith("/register") &&
+    !request.nextUrl.pathname.startsWith("/_next") &&
+    !request.nextUrl.pathname.startsWith("/api")
   ) {
     // no user, potentially respond by redirecting the user to the login page
-    console.log("🔄 Middleware: Redirecting unauthenticated user to login from", request.nextUrl.pathname);
+    console.log("🔄 Middleware: BLOCKING unauthenticated user from", request.nextUrl.pathname, "- redirecting to login");
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);

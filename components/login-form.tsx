@@ -42,25 +42,26 @@ export function LoginForm() {
           error: error.message,
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
-          url: window.location.href
+          url: window.location.href,
         });
         setError("Invalid email or password");
       } else {
-        console.log("✅ Login successful:", {
+        console.log("✅ Login successful - User found in Supabase Auth:", {
           email,
+          source: "Supabase auth.users table",
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
           url: window.location.href,
           referrer: document.referrer,
           screenResolution: `${screen.width}x${screen.height}`,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          language: navigator.language
+          language: navigator.language,
         });
         router.replace("/dashboard");
       }
-        } catch {
-          setError("Something went wrong. Please try again.");
-        } finally {
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };
