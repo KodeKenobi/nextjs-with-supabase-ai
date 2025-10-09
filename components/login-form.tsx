@@ -37,8 +37,10 @@ export function LoginForm() {
       });
 
       if (error) {
+        console.log("❌ Login failed:", error.message);
         setError("Invalid email or password");
       } else {
+        console.log("✅ Login successful for:", email);
         router.replace("/dashboard");
       }
         } catch {

@@ -47,6 +47,17 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
+  // Log authentication status
+  if (user) {
+    console.log("🔐 Middleware: Authenticated user accessing", request.nextUrl.pathname, {
+      userId: user.sub,
+      email: user.email,
+      path: request.nextUrl.pathname
+    });
+  } else {
+    console.log("🚫 Middleware: No authenticated user for", request.nextUrl.pathname);
+  }
+
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&
@@ -54,6 +65,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/auth")
   ) {
     // no user, potentially respond by redirecting the user to the login page
+    console.log("🔄 Middleware: Redirecting unauthenticated user to login from", request.nextUrl.pathname);
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);

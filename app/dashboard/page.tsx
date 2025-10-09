@@ -12,8 +12,19 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
+    console.log("❌ No authenticated user found, redirecting to login");
     redirect("/auth/login");
   }
+
+  console.log("✅ User signed in:", {
+    id: user.id,
+    email: user.email,
+    firstName: user.user_metadata?.first_name,
+    lastName: user.user_metadata?.last_name,
+    companyName: user.user_metadata?.company_name,
+    confirmedAt: user.email_confirmed_at,
+    createdAt: user.created_at
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">

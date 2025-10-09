@@ -70,10 +70,12 @@ export function SignUpForm() {
       });
 
       if (response.ok) {
+        console.log("✅ Account created successfully for:", formData.email);
         // Redirect to success page - user needs to confirm email first
         router.replace("/auth/sign-up-success");
       } else {
         const data = await response.json();
+        console.log("❌ Account creation failed:", data.error);
         setError(data.error || "Something went wrong");
       }
     } catch {
