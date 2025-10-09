@@ -117,8 +117,12 @@ export default function DashboardOverview({ user }: { user: User }) {
   });
   const [recentContent, setRecentContent] = useState<ContentItem[]>([]);
   const [recentInsights, setRecentInsights] = useState<Insight[]>([]);
-  const [consistencyReport, setConsistencyReport] = useState<Report | null>(null);
-  const [gapAnalysisReport, setGapAnalysisReport] = useState<Report | null>(null);
+  const [consistencyReport, setConsistencyReport] = useState<Report | null>(
+    null
+  );
+  const [gapAnalysisReport, setGapAnalysisReport] = useState<Report | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -153,11 +157,11 @@ export default function DashboardOverview({ user }: { user: User }) {
       const totalContent = contentData.length || 0;
       const totalInsights = insightsData.length || 0;
       const processedContent =
-        contentData.filter((item: ContentItem) => item.status === "COMPLETED").length ||
-        0;
+        contentData.filter((item: ContentItem) => item.status === "COMPLETED")
+          .length || 0;
       const pendingContent =
-        contentData.filter((item: ContentItem) => item.status === "PENDING").length ||
-        0;
+        contentData.filter((item: ContentItem) => item.status === "PENDING")
+          .length || 0;
 
       setStats({
         totalContent,
@@ -248,9 +252,7 @@ export default function DashboardOverview({ user }: { user: User }) {
             <div className="flex items-center">
               <Brain className="h-8 w-8 text-purple-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  AI Insights
-                </p>
+                <p className="text-sm font-medium text-gray-600">AI Insights</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.totalInsights}
                 </p>

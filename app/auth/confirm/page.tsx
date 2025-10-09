@@ -117,26 +117,26 @@ function ConfirmContent() {
 
 export default function ConfirmPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm">
-          <Card>
-            <CardHeader className="text-center">
-              <CardTitle>Email Confirmation</CardTitle>
-              <CardDescription>Loading...</CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <div className="flex flex-col items-center space-y-4">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                <p className="text-sm text-gray-600">
-                  Please wait...
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+    <Suspense
+      fallback={
+        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+          <div className="w-full max-w-sm">
+            <Card>
+              <CardHeader className="text-center">
+                <CardTitle>Email Confirmation</CardTitle>
+                <CardDescription>Loading...</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <div className="flex flex-col items-center space-y-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                  <p className="text-sm text-gray-600">Please wait...</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ConfirmContent />
     </Suspense>
   );

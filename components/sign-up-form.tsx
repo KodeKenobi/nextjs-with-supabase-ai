@@ -70,26 +70,14 @@ export function SignUpForm() {
       });
 
       if (response.ok) {
-        // Auto sign in after successful registration
-        const supabase = createClient();
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        if (!error) {
-          router.replace("/dashboard");
-        } else {
-          setError(
-            "Account created but sign in failed. Please try logging in."
-          );
-        }
+        // Redirect to success page - user needs to confirm email first
+        router.replace("/auth/sign-up-success");
       } else {
         const data = await response.json();
         setError(data.error || "Something went wrong");
       }
-        } catch {
-          setError("Something went wrong. Please try again.");
+    } catch {
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -175,7 +163,7 @@ export function SignUpForm() {
                   required
                 />
               </div>
-                </div>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password *</Label>
@@ -192,7 +180,7 @@ export function SignUpForm() {
                   required
                 />
               </div>
-                </div>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password *</Label>
@@ -233,7 +221,7 @@ export function SignUpForm() {
                 Sign in
               </Link>
             </p>
-            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
