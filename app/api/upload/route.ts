@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const title = formData.get("title") as string;
+    let title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const companyName = formData.get("companyName") as string;
     const contentType = formData.get("contentType") as string;
