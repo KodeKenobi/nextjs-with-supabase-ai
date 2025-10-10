@@ -192,40 +192,40 @@ ALTER TABLE consistency_reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gap_analysis_reports ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies (users can only access their own data)
-CREATE POLICY IF NOT EXISTS "Users can view own content" ON content_items FOR SELECT USING (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can insert own content" ON content_items FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can update own content" ON content_items FOR UPDATE USING (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can delete own content" ON content_items FOR DELETE USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can view own content" ON content_items FOR SELECT USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can insert own content" ON content_items FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can update own content" ON content_items FOR UPDATE USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can delete own content" ON content_items FOR DELETE USING (auth.uid()::text = user_id::text);
 
-CREATE POLICY IF NOT EXISTS "Users can view own insights" ON business_insights FOR SELECT USING (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can insert own insights" ON business_insights FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can update own insights" ON business_insights FOR UPDATE USING (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can delete own insights" ON business_insights FOR DELETE USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can view own insights" ON business_insights FOR SELECT USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can insert own insights" ON business_insights FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can update own insights" ON business_insights FOR UPDATE USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can delete own insights" ON business_insights FOR DELETE USING (auth.uid()::text = user_id::text);
 
-CREATE POLICY IF NOT EXISTS "Users can view own consistency reports" ON consistency_reports FOR SELECT USING (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can insert own consistency reports" ON consistency_reports FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can update own consistency reports" ON consistency_reports FOR UPDATE USING (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can delete own consistency reports" ON consistency_reports FOR DELETE USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can view own consistency reports" ON consistency_reports FOR SELECT USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can insert own consistency reports" ON consistency_reports FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can update own consistency reports" ON consistency_reports FOR UPDATE USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can delete own consistency reports" ON consistency_reports FOR DELETE USING (auth.uid()::text = user_id::text);
 
-CREATE POLICY IF NOT EXISTS "Users can view own gap analysis reports" ON gap_analysis_reports FOR SELECT USING (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can insert own gap analysis reports" ON gap_analysis_reports FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can update own gap analysis reports" ON gap_analysis_reports FOR UPDATE USING (auth.uid()::text = user_id::text);
-CREATE POLICY IF NOT EXISTS "Users can delete own gap analysis reports" ON gap_analysis_reports FOR DELETE USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can view own gap analysis reports" ON gap_analysis_reports FOR SELECT USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can insert own gap analysis reports" ON gap_analysis_reports FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can update own gap analysis reports" ON gap_analysis_reports FOR UPDATE USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Users can delete own gap analysis reports" ON gap_analysis_reports FOR DELETE USING (auth.uid()::text = user_id::text);
 
 -- Companies are public for now (can be restricted later)
-CREATE POLICY IF NOT EXISTS "Companies are viewable by all" ON companies FOR SELECT USING (true);
+CREATE POLICY "Companies are viewable by all" ON companies FOR SELECT USING (true);
 
 -- Transcriptions follow content items
-CREATE POLICY IF NOT EXISTS "Users can view transcriptions of own content" ON transcriptions FOR SELECT USING (
+CREATE POLICY "Users can view transcriptions of own content" ON transcriptions FOR SELECT USING (
   EXISTS (SELECT 1 FROM content_items WHERE content_items.id = transcriptions.content_item_id AND auth.uid()::text = content_items.user_id::text)
 );
-CREATE POLICY IF NOT EXISTS "Users can insert transcriptions for own content" ON transcriptions FOR INSERT WITH CHECK (
+CREATE POLICY "Users can insert transcriptions for own content" ON transcriptions FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM content_items WHERE content_items.id = transcriptions.content_item_id AND auth.uid()::text = content_items.user_id::text)
 );
-CREATE POLICY IF NOT EXISTS "Users can update transcriptions of own content" ON transcriptions FOR UPDATE USING (
+CREATE POLICY "Users can update transcriptions of own content" ON transcriptions FOR UPDATE USING (
   EXISTS (SELECT 1 FROM content_items WHERE content_items.id = transcriptions.content_item_id AND auth.uid()::text = content_items.user_id::text)
 );
-CREATE POLICY IF NOT EXISTS "Users can delete transcriptions of own content" ON transcriptions FOR DELETE USING (
+CREATE POLICY "Users can delete transcriptions of own content" ON transcriptions FOR DELETE USING (
   EXISTS (SELECT 1 FROM content_items WHERE content_items.id = transcriptions.content_item_id AND auth.uid()::text = content_items.user_id::text)
 );
 
@@ -235,18 +235,18 @@ VALUES ('content-files', 'content-files', FALSE)
 ON CONFLICT (id) DO NOTHING;
 
 -- Add RLS policies for the content-files bucket
-CREATE POLICY IF NOT EXISTS "Allow authenticated uploads" ON storage.objects FOR INSERT WITH CHECK (
+CREATE POLICY "Allow authenticated uploads" ON storage.objects FOR INSERT WITH CHECK (
   bucket_id = 'content-files' AND auth.uid()::text = (storage.foldername(name))[2]
 );
 
-CREATE POLICY IF NOT EXISTS "Allow authenticated reads" ON storage.objects FOR SELECT USING (
+CREATE POLICY "Allow authenticated reads" ON storage.objects FOR SELECT USING (
   bucket_id = 'content-files' AND auth.uid()::text = (storage.foldername(name))[2]
 );
 
-CREATE POLICY IF NOT EXISTS "Allow authenticated updates" ON storage.objects FOR UPDATE USING (
+CREATE POLICY "Allow authenticated updates" ON storage.objects FOR UPDATE USING (
   bucket_id = 'content-files' AND auth.uid()::text = (storage.foldername(name))[2]
 );
 
-CREATE POLICY IF NOT EXISTS "Allow authenticated deletes" ON storage.objects FOR DELETE USING (
+CREATE POLICY "Allow authenticated deletes" ON storage.objects FOR DELETE USING (
   bucket_id = 'content-files' AND auth.uid()::text = (storage.foldername(name))[2]
 );
