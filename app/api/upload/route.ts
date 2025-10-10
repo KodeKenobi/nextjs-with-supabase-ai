@@ -6,8 +6,12 @@ export async function POST(request: NextRequest) {
   console.log("🚀 Upload API called");
   console.log("🔍 Environment check:", {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? "✅ Set" : "❌ Missing",
-    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "✅ Set" : "❌ Missing",
-    supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? "✅ Set" : "❌ Missing",
+    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      ? "✅ Set"
+      : "❌ Missing",
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? "✅ Set"
+      : "❌ Missing",
   });
 
   try {
