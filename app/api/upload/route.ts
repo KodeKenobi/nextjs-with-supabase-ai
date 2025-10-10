@@ -4,6 +4,11 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   console.log("🚀 Upload API called");
+  console.log("🔍 Environment check:", {
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? "✅ Set" : "❌ Missing",
+    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "✅ Set" : "❌ Missing",
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? "✅ Set" : "❌ Missing",
+  });
 
   try {
     const supabase = await createClient();
@@ -267,6 +272,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("❌ Upload error:", error);
+    console.error("❌ Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : "No stack trace",
+      name: error instanceof Error ? error.name : "Unknown error type",
+    });
     return NextResponse.json(
       {
         error: "Internal server error",
