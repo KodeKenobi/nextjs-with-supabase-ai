@@ -244,27 +244,36 @@ export default function CompanySearch() {
             <div className="mt-8">
               <h3 className="text-lg font-semibold mb-4">Related Content</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {results.relatedContent.map((content) => (
+                {results.relatedContent.map((content) => {
+                  const typedContent = content as {
+                    id: string;
+                    title: string;
+                    description?: string;
+                    content_type?: string;
+                    status: string;
+                  };
+                  return (
                   <Card
-                    key={content.id}
+                    key={typedContent.id}
                     className="hover:shadow-md transition-shadow"
                   >
                     <CardContent className="p-4">
                       <h4 className="font-medium text-gray-900">
-                        {content.title}
+                        {typedContent.title}
                       </h4>
                       <p className="text-sm text-gray-600 mt-1">
-                        {content.description || "No description available"}
+                        {typedContent.description || "No description available"}
                       </p>
                       <div className="mt-2 flex items-center gap-2">
                         <Badge variant="secondary" className="text-xs">
-                          {content.content_type?.replace("_", " ")}
+                          {typedContent.content_type?.replace("_", " ")}
                         </Badge>
-                        <Badge className="text-xs">{content.status}</Badge>
+                        <Badge className="text-xs">{typedContent.status}</Badge>
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

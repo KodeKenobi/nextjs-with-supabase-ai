@@ -90,15 +90,18 @@ async function analyzeGaps(contentItems: unknown[]) {
   // This would integrate with AI for actual gap analysis
   // For now, return mock gaps based on content analysis
 
-  const gaps = [];
-  const allCategories = new Set();
+  const gaps: unknown[] = [];
+  const allCategories = new Set<string>();
   // const allTopics = new Set();
 
   // Analyze existing content
   contentItems.forEach((item) => {
-    if (item.business_insights) {
-       item.business_insights.forEach((insight: unknown) => {
-         allCategories.add((insight as { category: string }).category);
+    const typedItem = item as {
+      business_insights?: Array<{ category: string; content: string }>;
+    };
+    if (typedItem.business_insights) {
+      typedItem.business_insights.forEach((insight) => {
+        allCategories.add(insight.category);
       });
     }
   });
@@ -147,7 +150,7 @@ async function analyzeGaps(contentItems: unknown[]) {
   });
 
   // Check for content diversity
-  const contentTypes = new Set(contentItems.map((item) => item.content_type));
+  const contentTypes = new Set(contentItems.map((item) => (item as { content_type: string }).content_type));
   const expectedTypes = ["AUDIO", "VIDEO", "BLOG_ARTICLE", "DOCUMENT", "TEXT"];
 
   expectedTypes.forEach((type) => {

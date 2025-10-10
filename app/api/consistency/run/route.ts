@@ -85,15 +85,21 @@ export async function POST(_request: NextRequest) {
 async function analyzeConsistency(contentItems: unknown[]) {
   // This would integrate with AI for actual consistency analysis
   // For now, return mock contradictions
-  const contradictions = [];
+  const contradictions: unknown[] = [];
 
   // Simple keyword-based contradiction detection
   const allText = contentItems
     .map((item) => {
-      const transcription = item.transcriptions?.[0]?.content || "";
+      const typedItem = item as {
+        title: string;
+        description?: string;
+        transcriptions?: Array<{ content: string }>;
+        business_insights?: Array<{ content: string }>;
+      };
+      const transcription = typedItem.transcriptions?.[0]?.content || "";
       const insights =
-         item.business_insights?.map((i: unknown) => (i as { content: string }).content).join(" ") || "";
-      return `${item.title} ${item.description} ${transcription} ${insights}`.toLowerCase();
+        typedItem.business_insights?.map((i) => i.content).join(" ") || "";
+      return `${typedItem.title} ${typedItem.description || ""} ${transcription} ${insights}`.toLowerCase();
     })
     .join(" ");
 
@@ -125,7 +131,11 @@ async function analyzeConsistency(contentItems: unknown[]) {
         severity: "MEDIUM",
         related_content: contentItems
           .filter((item) => {
-            const text = `${item.title} ${item.description}`.toLowerCase();
+            const typedItem = item as {
+              title: string;
+              description?: string;
+            };
+            const text = `${typedItem.title} ${typedItem.description || ""}`.toLowerCase();
             return (
               pattern.positive.some((word) => text.includes(word)) ||
               pattern.negative.some((word) => text.includes(word))
