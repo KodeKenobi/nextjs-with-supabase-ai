@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   console.log("🚀 Upload API called");
-  
+
   try {
     const supabase = await createClient();
 
@@ -33,13 +33,13 @@ export async function POST(request: NextRequest) {
 
     console.log("📝 Form data received:", {
       title: title || "empty",
-      description: description || "empty", 
+      description: description || "empty",
       companyName: companyName || "empty",
       contentType: contentType || "empty",
       source: source || "empty",
       hasFile: !!file,
       url: url || "empty",
-      hasText: !!text
+      hasText: !!text,
     });
 
     // Validate required fields - only companyName is required
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     let companyId = null;
     if (companyName) {
       console.log("🔍 Looking for company:", companyName);
-      
+
       // First, try to find existing company
       const { data: existingCompany, error: findError } = await supabaseAdmin
         .from("companies")
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       console.log("🔍 Company search result:", {
         found: !!existingCompany,
         error: findError?.message,
-        errorCode: findError?.code
+        errorCode: findError?.code,
       });
 
       if (findError && findError.code !== "PGRST116") {
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
         console.log("✅ Found existing company:", companyId);
       } else {
         console.log("🏗️ Creating new company:", companyName);
-        
+
         // Create new company
         const { data: newCompany, error: createError } = await supabaseAdmin
           .from("companies")
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         console.log("🏗️ Company creation result:", {
           success: !!newCompany,
           error: createError?.message,
-          errorCode: createError?.code
+          errorCode: createError?.code,
         });
 
         if (createError) {
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
 
     // Create content item in database
     console.log("📄 Creating content item with companyId:", companyId);
-    
+
     const { data: contentItem, error: contentError } = await supabaseAdmin
       .from("content_items")
       .insert({
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
       success: !!contentItem,
       error: contentError?.message,
       errorCode: contentError?.code,
-      contentId: contentItem?.id
+      contentId: contentItem?.id,
     });
 
     if (contentError) {
@@ -224,7 +224,10 @@ export async function POST(request: NextRequest) {
     if (contentError) {
       console.error("❌ Content creation error:", contentError);
       return NextResponse.json(
-        { error: "Failed to create content item", details: (contentError as any)?.message || "Unknown error" },
+        {
+          error: "Failed to create content item",
+          details: (contentError as any)?.message || "Unknown error",
+        },
         { status: 500 }
       );
     }
@@ -234,7 +237,7 @@ export async function POST(request: NextRequest) {
     // Start processing (this would trigger background job in production)
     // For now, we'll simulate immediate processing
     console.log("🔄 Starting content processing...");
-    
+
     if (source === "DIRECT_INPUT" && text && text.trim()) {
       console.log("📝 Processing text content");
       // Process text directly
@@ -265,7 +268,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("❌ Upload error:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
