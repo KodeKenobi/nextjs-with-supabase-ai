@@ -1,0 +1,31 @@
+---
+alwaysApply: true
+---
+
+# Build Locally Rules
+
+## Always Build Locally First
+
+- Always run `npm run build` locally before pushing changes
+- Fix all TypeScript and ESLint errors locally before committing
+- Ensure the build passes successfully before pushing to avoid Vercel deployment failures
+
+## Code Quality Standards
+
+- Use proper TypeScript types instead of `any`
+- Prefix unused parameters with `_` to avoid ESLint warnings
+- Ensure all API endpoints have proper error handling
+- Test API endpoints locally before deployment
+
+## Database Schema
+
+- Ensure all database tables exist before using them in API calls
+- Use proper error handling for database operations
+- Include detailed error messages for debugging
+
+## Script Validation
+
+- Always check scripts after editing to ensure they work correctly
+- Verify that edited scripts don't have syntax errors or broken functionality
+- Test scripts locally before considering them complete
+- Never leave scripts in a broken state - fix errors immediately

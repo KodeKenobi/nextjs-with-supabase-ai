@@ -32,7 +32,11 @@ export async function GET() {
     if (contentError) {
       console.error("Error fetching content:", contentError);
       return NextResponse.json(
-        { error: "Failed to fetch content" },
+        { 
+          error: "Failed to fetch content", 
+          details: contentError.message,
+          code: contentError.code
+        },
         { status: 500 }
       );
     }
