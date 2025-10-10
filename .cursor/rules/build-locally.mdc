@@ -4,6 +4,10 @@ alwaysApply: true
 
 # Build Locally Rules
 
+## Git procedures
+
+- Never ever perform git actions unless specifically told so.
+
 ## Always Build Locally First
 
 - Always run `npm run build` locally before pushing changes

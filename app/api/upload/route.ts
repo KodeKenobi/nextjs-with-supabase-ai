@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
     let title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const companyName = formData.get("companyName") as string;
-    const contentType = formData.get("contentType") as string;
-    const source = formData.get("source") as string;
+    let contentType = formData.get("contentType") as string;
+    let source = formData.get("source") as string;
     const file = formData.get("file") as File;
     const url = formData.get("url") as string;
     const text = formData.get("text") as string;
@@ -38,6 +38,14 @@ export async function POST(request: NextRequest) {
     if (!title || title.trim() === "") {
       const timestamp = new Date().toLocaleString();
       title = `Content Upload - ${timestamp}`;
+    }
+
+    // Generate default content type and source if not provided
+    if (!contentType) {
+      contentType = "TEXT";
+    }
+    if (!source) {
+      source = "DIRECT_INPUT";
     }
 
     // Handle file upload
@@ -150,12 +158,21 @@ export async function POST(request: NextRequest) {
 
     // Start processing (this would trigger background job in production)
     // For now, we'll simulate immediate processing
-    if (source === "DIRECT_INPUT" && text) {
+    if (source === "DIRECT_INPUT" && text && text.trim()) {
       // Process text directly
       await processTextContent(contentItem.id, text, user.id);
     } else if (cloudStoragePath) {
       // Process uploaded file
       await processFileContent(contentItem.id, cloudStoragePath, user.id);
+    } else {
+      // No content to process - just mark as completed
+      await supabaseAdmin
+        .from("content_items")
+        .update({
+          status: "COMPLETED",
+          processed_at: new Date().toISOString(),
+        })
+        .eq("id", contentItem.id);
     }
 
     return NextResponse.json({

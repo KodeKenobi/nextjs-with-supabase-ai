@@ -73,27 +73,12 @@ export default function UploadPage() {
     setSuccess("");
 
     try {
-      // Validate form data - only company name is required
+      // Validate form data - ONLY company name is required
       if (!formData.companyName.trim()) {
         throw new Error("Company name is required");
       }
 
-      // Optional validations based on source type
-      if (formData.source === "FILE_UPLOAD" && !formData.file) {
-        throw new Error("Please select a file to upload");
-      }
-
-      if (formData.source === "YOUTUBE_URL" && !formData.url?.trim()) {
-        throw new Error("Please enter a YouTube URL");
-      }
-
-      if (formData.source === "BLOG_URL" && !formData.url?.trim()) {
-        throw new Error("Please enter a blog URL");
-      }
-
-      if (formData.source === "DIRECT_INPUT" && !formData.text?.trim()) {
-        throw new Error("Please enter text content");
-      }
+      // NO OTHER VALIDATIONS - user can upload with just company name
 
       // Create form data for API
       const uploadFormData = new FormData();
