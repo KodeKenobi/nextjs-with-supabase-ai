@@ -26,7 +26,7 @@ export async function GET() {
     });
     
     // Test database connection
-    let dbTest = { success: false, error: null as string | null };
+    let dbTest: { success: boolean; error: string | null; hasCompanies?: boolean } = { success: false, error: null };
     try {
       const { data: companies, error: companiesError } = await supabaseAdmin
         .from("companies")
@@ -48,7 +48,7 @@ export async function GET() {
     console.log("Database test:", dbTest);
     
     // Test content_items table specifically
-    let contentTest = { success: false, error: null as string | null };
+    let contentTest: { success: boolean; error: string | null; hasContent?: boolean } = { success: false, error: null };
     try {
       const { data: contentItems, error: contentError } = await supabaseAdmin
         .from("content_items")
