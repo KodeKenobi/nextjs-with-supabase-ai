@@ -276,8 +276,7 @@ export default function UploadPage() {
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                placeholder="Enter content title"
-                required
+                placeholder="Enter content title (optional)"
               />
             </div>
 
@@ -367,7 +366,6 @@ export default function UploadPage() {
                       ? "https://www.youtube.com/watch?v=..."
                       : "https://example.com/blog-post"
                   }
-                  required
                 />
               </div>
             )}
@@ -375,15 +373,14 @@ export default function UploadPage() {
             {/* Direct Text Input */}
             {formData.source === "DIRECT_INPUT" && (
               <div className="space-y-2">
-                <Label htmlFor="text">Text Content *</Label>
+                <Label htmlFor="text">Text Content (optional)</Label>
                 <Textarea
                   id="text"
                   name="text"
                   value={formData.text || ""}
                   onChange={handleInputChange}
-                  placeholder="Paste your text content here..."
+                  placeholder="Paste your text content here... (optional)"
                   rows={8}
-                  required
                 />
               </div>
             )}
