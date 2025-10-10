@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,8 +30,26 @@ interface SearchResults {
 export default function CompanySearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults | null>(null);
+  const [allCompanies, setAllCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Fetch all companies on component mount
+  useEffect(() => {
+    const fetchAllCompanies = async () => {
+      try {
+        const response = await fetch("/api/companies");
+        if (response.ok) {
+          const companies = await response.json();
+          setAllCompanies(companies);
+        }
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+      }
+    };
+
+    fetchAllCompanies();
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -251,6 +269,98 @@ export default function CompanySearch() {
             </div>
           )}
         </div>
+      )}
+
+      {/* All Companies */}
+      {!results && allCompanies.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">All Companies</h2>
+            <span className="text-sm text-gray-500">
+              {allCompanies.length} companies
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allCompanies.map((company) => (
+              <Card key={company.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 mb-2">
+                        {company.name}
+                      </h3>
+                      {company.trading_name && (
+                        <p className="text-sm text-gray-600 mb-2">
+                          Trading as: {company.trading_name}
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-600 mb-3">
+                        {company.description || "No description available"}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {company.industry && (
+                          <Badge variant="secondary" className="text-xs">
+                            {company.industry}
+                          </Badge>
+                        )}
+                        {company.country && (
+                          <Badge variant="outline" className="text-xs">
+                            {company.country}
+                          </Badge>
+                        )}
+                        {company.size && (
+                          <Badge variant="outline" className="text-xs">
+                            {company.size}
+                          </Badge>
+                        )}
+                        {company.type && (
+                          <Badge className="text-xs">
+                            {company.type}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    {company.website && (
+                      <a
+                        href={company.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 text-blue-600 hover:text-blue-800"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    )}
+                  </div>
+                  <div className="mt-3 text-xs text-gray-500">
+                    Created: {new Date(company.created_at).toLocaleDateString()}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* No Companies Message */}
+      {!results && allCompanies.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Building2 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No Companies Found
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Upload content to create companies, or search for existing ones.
+            </p>
+            <Link href="/dashboard/upload">
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Upload Content
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

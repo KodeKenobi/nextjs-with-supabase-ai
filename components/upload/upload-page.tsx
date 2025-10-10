@@ -21,6 +21,7 @@ import {
 interface UploadFormData {
   title: string;
   description: string;
+  companyName: string;
   contentType: "AUDIO" | "VIDEO" | "TEXT" | "BLOG_ARTICLE" | "DOCUMENT";
   source: "FILE_UPLOAD" | "YOUTUBE_URL" | "BLOG_URL" | "DIRECT_INPUT";
   file?: File;
@@ -32,6 +33,7 @@ export default function UploadPage() {
   const [formData, setFormData] = useState<UploadFormData>({
     title: "",
     description: "",
+    companyName: "",
     contentType: "AUDIO",
     source: "FILE_UPLOAD",
   });
@@ -76,6 +78,10 @@ export default function UploadPage() {
         throw new Error("Title is required");
       }
 
+      if (!formData.companyName.trim()) {
+        throw new Error("Company name is required");
+      }
+
       if (formData.source === "FILE_UPLOAD" && !formData.file) {
         throw new Error("Please select a file to upload");
       }
@@ -96,6 +102,7 @@ export default function UploadPage() {
       const uploadFormData = new FormData();
       uploadFormData.append("title", formData.title);
       uploadFormData.append("description", formData.description || "");
+      uploadFormData.append("companyName", formData.companyName);
       uploadFormData.append("contentType", formData.contentType);
       uploadFormData.append("source", formData.source);
 
@@ -133,6 +140,7 @@ export default function UploadPage() {
       setFormData({
         title: "",
         description: "",
+        companyName: "",
         contentType: "AUDIO",
         source: "FILE_UPLOAD",
       });
@@ -287,6 +295,19 @@ export default function UploadPage() {
                 value={formData.title}
                 onChange={handleInputChange}
                 placeholder="Enter content title"
+                required
+              />
+            </div>
+
+            {/* Company Name */}
+            <div className="space-y-2">
+              <Label htmlFor="companyName">Company Name *</Label>
+              <Input
+                id="companyName"
+                name="companyName"
+                value={formData.companyName}
+                onChange={handleInputChange}
+                placeholder="Enter company name"
                 required
               />
             </div>

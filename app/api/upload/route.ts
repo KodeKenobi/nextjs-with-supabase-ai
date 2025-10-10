@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
+    const companyName = formData.get("companyName") as string;
     const contentType = formData.get("contentType") as string;
     const source = formData.get("source") as string;
     const file = formData.get("file") as File;
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
     const text = formData.get("text") as string;
 
     // Validate required fields
-    if (!title || !contentType || !source) {
+    if (!title || !contentType || !source || !companyName) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -65,6 +66,54 @@ export async function POST(request: NextRequest) {
       mimeType = file.type;
     }
 
+    // Find or create company
+    let companyId = null;
+    if (companyName) {
+      // First, try to find existing company
+      const { data: existingCompany, error: findError } = await supabaseAdmin
+        .from("companies")
+        .select("id")
+        .eq("name", companyName)
+        .single();
+
+      if (findError && findError.code !== "PGRST116") {
+        // PGRST116 is "not found" error, which is expected
+        console.error("Error finding company:", findError);
+        return NextResponse.json(
+          { error: "Failed to find company" },
+          { status: 500 }
+        );
+      }
+
+      if (existingCompany) {
+        companyId = existingCompany.id;
+      } else {
+        // Create new company
+        const { data: newCompany, error: createError } = await supabaseAdmin
+          .from("companies")
+          .insert({
+            name: companyName,
+            description: `Company created from content upload: ${title}`,
+            industry: "Unknown",
+            country: "Unknown",
+            size: "Unknown",
+            type: "TARGET",
+          })
+          .select("id")
+          .single();
+
+        if (createError) {
+          console.error("Error creating company:", createError);
+          return NextResponse.json(
+            { error: "Failed to create company" },
+            { status: 500 }
+          );
+        }
+
+        companyId = newCompany.id;
+      }
+    }
+
     // Create content item in database
     const { data: contentItem, error: contentError } = await supabaseAdmin
       .from("content_items")
@@ -79,6 +128,7 @@ export async function POST(request: NextRequest) {
         file_size: fileSize,
         mime_type: mimeType,
         status: "PENDING",
+        company_id: companyId,
         user_id: user.id,
       })
       .select()

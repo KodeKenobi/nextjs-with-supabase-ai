@@ -15,6 +15,7 @@ import {
   Eye,
   Calendar,
   Filter,
+  Building2,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -27,6 +28,12 @@ interface ContentItem {
   status: string;
   created_at: string;
   processed_at?: string;
+  company_id?: string;
+  companies?: {
+    id: string;
+    name: string;
+    industry?: string;
+  };
   transcription?: {
     word_count?: number;
     language?: string;
@@ -237,6 +244,19 @@ export default function ContentLibraryPage() {
                     {item.status}
                   </Badge>
                 </div>
+                {item.companies && (
+                  <div className="mt-2">
+                    <Badge variant="outline" className="text-xs">
+                      <Building2 className="h-3 w-3 mr-1" />
+                      {item.companies.name}
+                    </Badge>
+                    {item.companies.industry && (
+                      <Badge variant="secondary" className="text-xs ml-2">
+                        {item.companies.industry}
+                      </Badge>
+                    )}
+                  </div>
+                )}
                 {item.description && (
                   <p className="text-sm text-gray-600 line-clamp-2">
                     {item.description}

@@ -15,33 +15,36 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch content items for the user
-    const { data: contentItems, error: contentError } = await supabase
-      .from("content_items")
-      .select(
-        `
-        *,
-        transcriptions(*),
-        business_insights(*),
-        companies(id, name, industry)
-      `
-      )
-      .eq("user_id", user.id)
+    // Fetch all companies
+    const { data: companies, error: companiesError } = await supabase
+      .from("companies")
+      .select(`
+        id,
+        name,
+        description,
+        industry,
+        country,
+        size,
+        type,
+        website,
+        created_at,
+        updated_at
+      `)
       .order("created_at", { ascending: false });
 
-    if (contentError) {
-      console.error("Error fetching content:", contentError);
+    if (companiesError) {
+      console.error("Error fetching companies:", companiesError);
       return NextResponse.json(
-        { error: "Failed to fetch content" },
+        { error: "Failed to fetch companies" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(contentItems || []);
+    return NextResponse.json(companies || []);
   } catch (error) {
-    console.error("Content fetch error:", error);
+    console.error("Companies fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch content" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
