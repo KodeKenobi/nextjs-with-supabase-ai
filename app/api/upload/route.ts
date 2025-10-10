@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
+  console.log("🚀 Upload API called");
+  
   try {
     const supabase = await createClient();
 
@@ -13,8 +15,11 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
+      console.log("❌ User authentication failed:", userError?.message);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    console.log("✅ User authenticated:", user.email);
 
     const formData = await request.formData();
     let title = formData.get("title") as string;
@@ -26,13 +31,27 @@ export async function POST(request: NextRequest) {
     const url = formData.get("url") as string;
     const text = formData.get("text") as string;
 
+    console.log("📝 Form data received:", {
+      title: title || "empty",
+      description: description || "empty", 
+      companyName: companyName || "empty",
+      contentType: contentType || "empty",
+      source: source || "empty",
+      hasFile: !!file,
+      url: url || "empty",
+      hasText: !!text
+    });
+
     // Validate required fields - only companyName is required
     if (!companyName) {
+      console.log("❌ Company name is missing");
       return NextResponse.json(
         { error: "Company name is required" },
         { status: 400 }
       );
     }
+
+    console.log("✅ Company name validation passed:", companyName);
 
     // Generate default title if not provided
     if (!title || title.trim() === "") {
@@ -83,6 +102,8 @@ export async function POST(request: NextRequest) {
     // Find or create company
     let companyId = null;
     if (companyName) {
+      console.log("🔍 Looking for company:", companyName);
+      
       // First, try to find existing company
       const { data: existingCompany, error: findError } = await supabaseAdmin
         .from("companies")
@@ -90,18 +111,27 @@ export async function POST(request: NextRequest) {
         .eq("name", companyName)
         .single();
 
+      console.log("🔍 Company search result:", {
+        found: !!existingCompany,
+        error: findError?.message,
+        errorCode: findError?.code
+      });
+
       if (findError && findError.code !== "PGRST116") {
         // PGRST116 is "not found" error, which is expected
-        console.error("Error finding company:", findError);
+        console.error("❌ Error finding company:", findError);
         return NextResponse.json(
-          { error: "Failed to find company" },
+          { error: "Failed to find company", details: findError.message },
           { status: 500 }
         );
       }
 
       if (existingCompany) {
         companyId = existingCompany.id;
+        console.log("✅ Found existing company:", companyId);
       } else {
+        console.log("🏗️ Creating new company:", companyName);
+        
         // Create new company
         const { data: newCompany, error: createError } = await supabaseAdmin
           .from("companies")
@@ -116,19 +146,28 @@ export async function POST(request: NextRequest) {
           .select("id")
           .single();
 
+        console.log("🏗️ Company creation result:", {
+          success: !!newCompany,
+          error: createError?.message,
+          errorCode: createError?.code
+        });
+
         if (createError) {
-          console.error("Error creating company:", createError);
+          console.error("❌ Error creating company:", createError);
           return NextResponse.json(
-            { error: "Failed to create company" },
+            { error: "Failed to create company", details: createError.message },
             { status: 500 }
           );
         }
 
         companyId = newCompany.id;
+        console.log("✅ Created new company:", companyId);
       }
     }
 
     // Create content item in database
+    console.log("📄 Creating content item with companyId:", companyId);
+    
     const { data: contentItem, error: contentError } = await supabaseAdmin
       .from("content_items")
       .insert({
@@ -147,6 +186,13 @@ export async function POST(request: NextRequest) {
       })
       .select()
       .single();
+
+    console.log("📄 Content creation result:", {
+      success: !!contentItem,
+      error: contentError?.message,
+      errorCode: contentError?.code,
+      contentId: contentItem?.id
+    });
 
     if (contentError) {
       console.error("Content creation error:", contentError);
@@ -175,15 +221,51 @@ export async function POST(request: NextRequest) {
         .eq("id", contentItem.id);
     }
 
+    if (contentError) {
+      console.error("❌ Content creation error:", contentError);
+      return NextResponse.json(
+        { error: "Failed to create content item", details: (contentError as any)?.message || "Unknown error" },
+        { status: 500 }
+      );
+    }
+
+    console.log("✅ Content item created successfully:", contentItem.id);
+
+    // Start processing (this would trigger background job in production)
+    // For now, we'll simulate immediate processing
+    console.log("🔄 Starting content processing...");
+    
+    if (source === "DIRECT_INPUT" && text && text.trim()) {
+      console.log("📝 Processing text content");
+      // Process text directly
+      await processTextContent(contentItem.id, text, user.id);
+    } else if (cloudStoragePath) {
+      console.log("📁 Processing uploaded file");
+      // Process uploaded file
+      await processFileContent(contentItem.id, cloudStoragePath, user.id);
+    } else {
+      console.log("✅ No content to process - marking as completed");
+      // No content to process - just mark as completed
+      await supabaseAdmin
+        .from("content_items")
+        .update({
+          status: "COMPLETED",
+          processed_at: new Date().toISOString(),
+        })
+        .eq("id", contentItem.id);
+    }
+
+    console.log("🎉 Upload completed successfully!");
+
     return NextResponse.json({
       success: true,
       contentItem,
       message: "Content uploaded successfully and processing started",
     });
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error("❌ Upload error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
