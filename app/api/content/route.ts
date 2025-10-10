@@ -26,8 +26,8 @@ export async function GET() {
         companies(id, name, industry)
       `
       )
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .eq("userId", user.id)
+      .order("createdAt", { ascending: false });
 
     if (contentError) {
       console.error("Error fetching content:", contentError);

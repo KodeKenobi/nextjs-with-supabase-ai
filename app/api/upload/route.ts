@@ -173,16 +173,16 @@ export async function POST(request: NextRequest) {
       .insert({
         title,
         description,
-        content_type: contentType,
+        contentType: contentType,
         source: source,
-        source_url: url || null,
-        cloud_storage_path: cloudStoragePath,
-        file_name: fileName,
-        file_size: fileSize,
-        mime_type: mimeType,
+        sourceUrl: url || null,
+        cloudStoragePath: cloudStoragePath,
+        fileName: fileName,
+        fileSize: fileSize,
+        mimeType: mimeType,
         status: "PENDING",
-        company_id: companyId,
-        user_id: user.id,
+        companyId: companyId,
+        userId: user.id,
       })
       .select()
       .single();

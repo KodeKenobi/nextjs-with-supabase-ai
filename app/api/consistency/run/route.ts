@@ -26,7 +26,7 @@ export async function POST(_request: NextRequest) {
         business_insights(title, content, category)
       `
       )
-      .eq("user_id", user.id)
+      .eq("userId", user.id)
       .eq("status", "COMPLETED");
 
     if (contentError) {

@@ -19,8 +19,8 @@ export async function GET() {
     const { data: contentItems, error: contentError } = await supabase
       .from("content_items")
       .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .eq("userId", user.id)
+      .order("createdAt", { ascending: false });
 
     if (contentError) {
       console.error("Error fetching content:", contentError);
@@ -41,21 +41,21 @@ export async function GET() {
         const { data: transcriptions } = await supabase
           .from("transcriptions")
           .select("*")
-          .eq("content_item_id", item.id);
+          .eq("contentItemId", item.id);
 
         // Get business insights
         const { data: insights } = await supabase
           .from("business_insights")
           .select("*")
-          .eq("content_item_id", item.id);
+          .eq("contentItemId", item.id);
 
         // Get company info if company_id exists
         let company = null;
-        if (item.company_id) {
+        if (item.companyId) {
           const { data: companyData } = await supabase
             .from("companies")
             .select("id, name, industry")
-            .eq("id", item.company_id)
+            .eq("id", item.companyId)
             .single();
           company = companyData;
         }

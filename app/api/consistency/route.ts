@@ -19,8 +19,8 @@ export async function GET() {
     const { data: reports, error: reportsError } = await supabase
       .from("consistency_reports")
       .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .eq("userId", user.id)
+      .order("createdAt", { ascending: false });
 
     if (reportsError) {
       console.error("Error fetching consistency reports:", reportsError);

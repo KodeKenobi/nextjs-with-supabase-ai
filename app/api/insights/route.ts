@@ -24,12 +24,12 @@ export async function GET() {
         content_items!inner(
           id,
           title,
-          content_type
+          contentType
         )
       `
       )
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .eq("userId", user.id)
+      .order("createdAt", { ascending: false });
 
     if (insightsError) {
       console.error("Error fetching insights:", insightsError);
