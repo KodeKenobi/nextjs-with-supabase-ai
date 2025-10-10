@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
     if (source === "FILE_UPLOAD" && file) {
       // Upload file to Supabase Storage
       const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()
+      const uniqueFileName = `${Date.now()}-${Math.random()
         .toString(36)
         .substring(2)}.${fileExt}`;
-      const filePath = `content/${user.id}/${fileName}`;
+      const filePath = `content/${user.id}/${uniqueFileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("content-files")
@@ -173,8 +173,6 @@ async function processTextContent(
 ) {
   // This would integrate with OpenAI for analysis
   // For now, create a mock transcription and insights
-
-  const supabase = await createClient();
 
   // Create transcription
   await supabaseAdmin.from("transcriptions").insert({

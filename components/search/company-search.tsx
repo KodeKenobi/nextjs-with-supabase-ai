@@ -23,7 +23,7 @@ interface Company {
 
 interface SearchResults {
   companies: Company[];
-  relatedContent: any[];
+  relatedContent: unknown[];
   query: string;
 }
 
