@@ -99,7 +99,9 @@ async function analyzeConsistency(contentItems: unknown[]) {
       const transcription = typedItem.transcriptions?.[0]?.content || "";
       const insights =
         typedItem.business_insights?.map((i) => i.content).join(" ") || "";
-      return `${typedItem.title} ${typedItem.description || ""} ${transcription} ${insights}`.toLowerCase();
+      return `${typedItem.title} ${
+        typedItem.description || ""
+      } ${transcription} ${insights}`.toLowerCase();
     })
     .join(" ");
 
@@ -135,13 +137,18 @@ async function analyzeConsistency(contentItems: unknown[]) {
               title: string;
               description?: string;
             };
-            const text = `${typedItem.title} ${typedItem.description || ""}`.toLowerCase();
+            const text = `${typedItem.title} ${
+              typedItem.description || ""
+            }`.toLowerCase();
             return (
               pattern.positive.some((word) => text.includes(word)) ||
               pattern.negative.some((word) => text.includes(word))
             );
           })
-           .map((item) => ({ id: (item as { id: string }).id, title: (item as { title: string }).title })),
+          .map((item) => ({
+            id: (item as { id: string }).id,
+            title: (item as { title: string }).title,
+          })),
       });
     }
   });

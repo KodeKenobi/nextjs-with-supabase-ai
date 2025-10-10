@@ -73,15 +73,12 @@ export default function UploadPage() {
     setSuccess("");
 
     try {
-      // Validate form data
-      if (!formData.title.trim()) {
-        throw new Error("Title is required");
-      }
-
+      // Validate form data - only company name is required
       if (!formData.companyName.trim()) {
         throw new Error("Company name is required");
       }
 
+      // Optional validations based on source type
       if (formData.source === "FILE_UPLOAD" && !formData.file) {
         throw new Error("Please select a file to upload");
       }
@@ -288,7 +285,7 @@ export default function UploadPage() {
 
             {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">Title (optional)</Label>
               <Input
                 id="title"
                 name="title"

@@ -55,9 +55,11 @@ export async function POST(_request: NextRequest) {
         description: "Automated gap analysis of content strategy",
         gaps: gaps,
         total_gaps: gaps.length,
-         priority_gaps: gaps.filter(
-           (gap: unknown) => (gap as { priority: string }).priority === "HIGH" || (gap as { priority: string }).priority === "CRITICAL"
-         ).length,
+        priority_gaps: gaps.filter(
+          (gap: unknown) =>
+            (gap as { priority: string }).priority === "HIGH" ||
+            (gap as { priority: string }).priority === "CRITICAL"
+        ).length,
         recommendations: generateRecommendations(gaps),
         user_id: user.id,
       })
@@ -150,7 +152,9 @@ async function analyzeGaps(contentItems: unknown[]) {
   });
 
   // Check for content diversity
-  const contentTypes = new Set(contentItems.map((item) => (item as { content_type: string }).content_type));
+  const contentTypes = new Set(
+    contentItems.map((item) => (item as { content_type: string }).content_type)
+  );
   const expectedTypes = ["AUDIO", "VIDEO", "BLOG_ARTICLE", "DOCUMENT", "TEXT"];
 
   expectedTypes.forEach((type) => {

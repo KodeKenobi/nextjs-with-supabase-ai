@@ -26,12 +26,18 @@ export async function POST(request: NextRequest) {
     const url = formData.get("url") as string;
     const text = formData.get("text") as string;
 
-    // Validate required fields
-    if (!title || !contentType || !source || !companyName) {
+    // Validate required fields - only companyName is required
+    if (!companyName) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Company name is required" },
         { status: 400 }
       );
+    }
+
+    // Generate default title if not provided
+    if (!title || title.trim() === "") {
+      const timestamp = new Date().toLocaleString();
+      title = `Content Upload - ${timestamp}`;
     }
 
     // Handle file upload

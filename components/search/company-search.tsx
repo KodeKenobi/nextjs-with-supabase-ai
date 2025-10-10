@@ -253,25 +253,28 @@ export default function CompanySearch() {
                     status: string;
                   };
                   return (
-                  <Card
-                    key={typedContent.id}
-                    className="hover:shadow-md transition-shadow"
-                  >
-                    <CardContent className="p-4">
-                      <h4 className="font-medium text-gray-900">
-                        {typedContent.title}
-                      </h4>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {typedContent.description || "No description available"}
-                      </p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {typedContent.content_type?.replace("_", " ")}
-                        </Badge>
-                        <Badge className="text-xs">{typedContent.status}</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <Card
+                      key={typedContent.id}
+                      className="hover:shadow-md transition-shadow"
+                    >
+                      <CardContent className="p-4">
+                        <h4 className="font-medium text-gray-900">
+                          {typedContent.title}
+                        </h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {typedContent.description ||
+                            "No description available"}
+                        </p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {typedContent.content_type?.replace("_", " ")}
+                          </Badge>
+                          <Badge className="text-xs">
+                            {typedContent.status}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>
@@ -289,10 +292,13 @@ export default function CompanySearch() {
               {allCompanies.length} companies
             </span>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {allCompanies.map((company) => (
-              <Card key={company.id} className="hover:shadow-md transition-shadow">
+              <Card
+                key={company.id}
+                className="hover:shadow-md transition-shadow"
+              >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -324,9 +330,7 @@ export default function CompanySearch() {
                           </Badge>
                         )}
                         {company.type && (
-                          <Badge className="text-xs">
-                            {company.type}
-                          </Badge>
+                          <Badge className="text-xs">{company.type}</Badge>
                         )}
                       </div>
                     </div>
