@@ -26,7 +26,7 @@ export async function GET() {
     });
     
     // Test database connection
-    let dbTest = { success: false, error: null };
+    let dbTest = { success: false, error: null as string | null };
     try {
       const { data: companies, error: companiesError } = await supabaseAdmin
         .from("companies")
@@ -35,7 +35,7 @@ export async function GET() {
       
       dbTest = { 
         success: !companiesError, 
-        error: companiesError?.message,
+        error: companiesError?.message || null,
         hasCompanies: !!companies 
       };
     } catch (dbErr) {
@@ -48,7 +48,7 @@ export async function GET() {
     console.log("Database test:", dbTest);
     
     // Test content_items table specifically
-    let contentTest = { success: false, error: null };
+    let contentTest = { success: false, error: null as string | null };
     try {
       const { data: contentItems, error: contentError } = await supabaseAdmin
         .from("content_items")
@@ -57,7 +57,7 @@ export async function GET() {
       
       contentTest = { 
         success: !contentError, 
-        error: contentError?.message,
+        error: contentError?.message || null,
         hasContent: !!contentItems 
       };
     } catch (contentErr) {
