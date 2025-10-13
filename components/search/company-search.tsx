@@ -168,7 +168,10 @@ export default function CompanySearch() {
             {(results?.companies || allCompanies).map((company) => (
               <Card
                 key={company.id}
-                className="hover:shadow-lg transition-shadow"
+                className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() =>
+                  (window.location.href = `/dashboard/companies/${company.id}`)
+                }
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -224,6 +227,15 @@ export default function CompanySearch() {
                     )}
                   </div>
                   <div className="mt-4 flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.location.href = `/dashboard/companies/${company.id}`;
+                      }}
+                    >
+                      View Details
+                    </Button>
                     {company.website && (
                       <Button size="sm" variant="outline" asChild>
                         <a
@@ -231,6 +243,7 @@ export default function CompanySearch() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <ExternalLink className="h-3 w-3 mr-1" />
                           Website
