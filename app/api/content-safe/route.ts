@@ -19,16 +19,16 @@ export async function GET() {
     const { data: contentItems, error: contentError } = await supabase
       .from("content_items")
       .select("*")
-      .eq("userId", user.id)
-      .order("createdAt", { ascending: false });
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
     if (contentError) {
       console.error("Error fetching content:", contentError);
       return NextResponse.json(
-        { 
-          error: "Failed to fetch content", 
+        {
+          error: "Failed to fetch content",
           details: contentError.message,
-          code: contentError.code
+          code: contentError.code,
         },
         { status: 500 }
       );
@@ -41,21 +41,21 @@ export async function GET() {
         const { data: transcriptions } = await supabase
           .from("transcriptions")
           .select("*")
-          .eq("contentItemId", item.id);
+          .eq("content_item_id", item.id);
 
         // Get business insights
         const { data: insights } = await supabase
           .from("business_insights")
           .select("*")
-          .eq("contentItemId", item.id);
+          .eq("content_item_id", item.id);
 
         // Get company info if company_id exists
         let company = null;
-        if (item.companyId) {
+        if (item.company_id) {
           const { data: companyData } = await supabase
             .from("companies")
             .select("id, name, industry")
-            .eq("id", item.companyId)
+            .eq("id", item.company_id)
             .single();
           company = companyData;
         }
@@ -64,7 +64,7 @@ export async function GET() {
           ...item,
           transcriptions: transcriptions || [],
           business_insights: insights || [],
-          companies: company
+          companies: company,
         };
       })
     );
@@ -73,9 +73,9 @@ export async function GET() {
   } catch (error) {
     console.error("Content fetch error:", error);
     return NextResponse.json(
-      { 
-        error: "Failed to fetch content", 
-        details: error instanceof Error ? error.message : "Unknown error"
+      {
+        error: "Failed to fetch content",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );

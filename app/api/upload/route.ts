@@ -28,7 +28,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("✅ User authenticated:", user.email);
+    console.log(
+      "✅ User authenticated:",
+      user.email,
+      "ID:",
+      user.id,
+      "ID type:",
+      typeof user.id
+    );
 
     const formData = await request.formData();
     let title = formData.get("title") as string;
@@ -182,16 +189,16 @@ export async function POST(request: NextRequest) {
       .insert({
         title,
         description,
-        contentType: contentType,
+        content_type: contentType,
         source: source,
-        sourceUrl: url || null,
-        cloudStoragePath: cloudStoragePath,
-        fileName: fileName,
-        fileSize: fileSize,
-        mimeType: mimeType,
+        source_url: url || null,
+        cloud_storage_path: cloudStoragePath,
+        file_name: fileName,
+        file_size: fileSize,
+        mime_type: mimeType,
         status: "PENDING",
-        companyId: companyId,
-        userId: user.id,
+        company_id: companyId,
+        user_id: user.id,
       })
       .select()
       .single();
