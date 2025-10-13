@@ -160,6 +160,8 @@ export async function POST(request: NextRequest) {
             country: "Unknown",
             size: "Unknown",
             type: "TARGET",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           })
           .select("id")
           .single();
@@ -202,6 +204,8 @@ export async function POST(request: NextRequest) {
         status: "PENDING",
         company_id: companyId,
         user_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
