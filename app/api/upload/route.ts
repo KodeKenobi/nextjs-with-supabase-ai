@@ -261,31 +261,45 @@ export async function POST(request: NextRequest) {
     // For now, we'll simulate immediate processing
     console.log("🔄 Starting content processing...");
 
-    if (source === "DIRECT_INPUT" && text && text.trim()) {
-      console.log("📝 Processing text content");
-      // Process text directly
-      await processTextContent(contentId, text, user.id);
-    } else if (cloudStoragePath) {
-      console.log("📁 Processing uploaded file");
-      // Process uploaded file
-      await processFileContent(contentId, cloudStoragePath, user.id);
-    } else {
-      console.log("✅ No content to process - marking as completed");
-      // No content to process - just mark as completed
-      await supabaseAdmin
-        .from("content_items")
-        .update({
-          status: "COMPLETED",
-          processed_at: new Date().toISOString(),
-        })
-        .eq("id", contentId);
+    try {
+      if (source === "DIRECT_INPUT" && text && text.trim()) {
+        console.log("📝 Processing text content");
+        // Process text directly
+        await processTextContent(contentId, text, user.id);
+      } else if (cloudStoragePath) {
+        console.log("📁 Processing uploaded file");
+        // Process uploaded file
+        await processFileContent(contentId, cloudStoragePath, user.id);
+      } else {
+        console.log("✅ No content to process - marking as completed");
+        // No content to process - just mark as completed
+        await supabaseAdmin
+          .from("content_items")
+          .update({
+            status: "COMPLETED",
+            processed_at: new Date().toISOString(),
+          })
+          .eq("id", contentId);
+      }
+    } catch (processingError) {
+      console.error("❌ Processing error:", processingError);
+      // Don't fail the upload if processing fails, just log it
     }
 
     console.log("🎉 Upload completed successfully!");
 
     return NextResponse.json({
       success: true,
-      contentItem,
+      contentItem: {
+        id: contentId,
+        title,
+        description,
+        content_type: contentType,
+        source: source,
+        company_id: companyId,
+        user_id: user.id,
+        status: "PENDING"
+      },
       message: "Content uploaded successfully and processing started",
     });
   } catch (error) {
