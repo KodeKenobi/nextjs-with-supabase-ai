@@ -194,11 +194,6 @@ export async function POST(request: NextRequest) {
         description,
         contentType: contentType,
         source: source,
-        sourceUrl: url || null,
-        cloudStoragePath: cloudStoragePath,
-        fileName: fileName,
-        fileSize: fileSize,
-        mimeType: mimeType,
         status: "PENDING",
         companyId: companyId,
         userId: user.id,
@@ -294,7 +289,7 @@ export async function POST(request: NextRequest) {
         source: source,
         companyId: companyId,
         userId: user.id,
-        status: "PENDING"
+        status: "PENDING",
       },
       message: "Content uploaded successfully and processing started",
     });

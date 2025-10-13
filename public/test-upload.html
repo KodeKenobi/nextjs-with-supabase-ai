@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Upload</title>
+  </head>
+  <body>
+    <h1>Test Upload Functionality</h1>
+    <button onclick="testUpload()">Test Upload</button>
+    <div id="result"></div>
+
+    <script>
+      async function testUpload() {
+        try {
+          console.log("🧪 Testing upload from browser...");
+
+          const formData = new FormData();
+          formData.append("title", "Browser Test Upload");
+          formData.append("description", "Testing upload from browser");
+          formData.append(
+            "companyName",
+            "Kode Kenobi Browser Test " + Date.now()
+          );
+          formData.append("contentType", "TEXT");
+          formData.append("source", "DIRECT_INPUT");
+          formData.append("hasFile", "false");
+          formData.append("hasText", "true");
+          formData.append("textContent", "Browser test content");
+
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.text();
+
+          document.getElementById("result").innerHTML = `
+                    <h3>Upload Result:</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <pre>${result}</pre>
+                `;
+
+          console.log("📊 Status:", response.status);
+          console.log("📄 Response:", result);
+        } catch (error) {
+          console.error("💥 Error:", error);
+          document.getElementById(
+            "result"
+          ).innerHTML = `<p>Error: ${error.message}</p>`;
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -24,7 +24,7 @@ export async function GET() {
         content_items!inner(
           id,
           title,
-          contentType
+          contenttype
         )
       `
       )

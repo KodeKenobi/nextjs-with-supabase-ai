@@ -18,7 +18,7 @@ interface Company {
   country?: string;
   size?: string;
   type?: string;
-  created_at: string;
+  createdAt?: string;
 }
 
 interface SearchResults {
@@ -39,9 +39,14 @@ export default function CompanySearch() {
     const fetchAllCompanies = async () => {
       try {
         const response = await fetch("/api/companies");
+        console.log("Companies API response status:", response.status);
         if (response.ok) {
           const companies = await response.json();
+          console.log("Companies fetched:", companies);
           setAllCompanies(companies);
+        } else {
+          const errorText = await response.text();
+          console.error("Companies API error:", errorText);
         }
       } catch (error) {
         console.error("Error fetching companies:", error);
@@ -124,9 +129,9 @@ export default function CompanySearch() {
         </div>
       )}
 
-      {/* Search Results */}
-      {results && (
-        <div className="space-y-6">
+      {/* Search Results or All Companies */}
+      <div className="space-y-6">
+        {results ? (
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">
               Search Results for &ldquo;{results.query}&rdquo;
@@ -135,245 +140,148 @@ export default function CompanySearch() {
               {results.companies.length} companies found
             </span>
           </div>
-
-          {results.companies.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-gray-500 mb-4">No companies found</p>
-                <Button asChild>
-                  <Link href="/dashboard/companies/new">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add New Company
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {results.companies.map((company) => (
-                <Card
-                  key={company.id}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">
-                          {company.name}
-                        </CardTitle>
-                        {company.trading_name && (
-                          <p className="text-sm text-gray-600">
-                            Trading as: {company.trading_name}
-                          </p>
-                        )}
-                      </div>
-                      {company.type && (
-                        <Badge className={getTypeColor(company.type)}>
-                          {company.type}
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {company.description && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {company.description}
-                      </p>
-                    )}
-                    <div className="space-y-2">
-                      {company.industry && (
-                        <div className="flex items-center text-sm">
-                          <span className="font-medium text-gray-700">
-                            Industry:
-                          </span>
-                          <span className="ml-2 text-gray-600">
-                            {company.industry}
-                          </span>
-                        </div>
-                      )}
-                      {company.country && (
-                        <div className="flex items-center text-sm">
-                          <span className="font-medium text-gray-700">
-                            Country:
-                          </span>
-                          <span className="ml-2 text-gray-600">
-                            {company.country}
-                          </span>
-                        </div>
-                      )}
-                      {company.size && (
-                        <div className="flex items-center text-sm">
-                          <span className="font-medium text-gray-700">
-                            Size:
-                          </span>
-                          <span className="ml-2 text-gray-600">
-                            {company.size}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="mt-4 flex gap-2">
-                      {company.website && (
-                        <Button size="sm" variant="outline" asChild>
-                          <a
-                            href={company.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center"
-                          >
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            Website
-                          </a>
-                        </Button>
-                      )}
-                      <Button size="sm" asChild>
-                        <Link href={`/dashboard/companies/${company.id}`}>
-                          View Details
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* Related Content */}
-          {results.relatedContent && results.relatedContent.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Related Content</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {results.relatedContent.map((content) => {
-                  const typedContent = content as {
-                    id: string;
-                    title: string;
-                    description?: string;
-                    content_type?: string;
-                    status: string;
-                  };
-                  return (
-                    <Card
-                      key={typedContent.id}
-                      className="hover:shadow-md transition-shadow"
-                    >
-                      <CardContent className="p-4">
-                        <h4 className="font-medium text-gray-900">
-                          {typedContent.title}
-                        </h4>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {typedContent.description ||
-                            "No description available"}
-                        </p>
-                        <div className="mt-2 flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {typedContent.content_type?.replace("_", " ")}
-                          </Badge>
-                          <Badge className="text-xs">
-                            {typedContent.status}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* All Companies */}
-      {!results && allCompanies.length > 0 && (
-        <div className="space-y-6">
+        ) : (
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">All Companies</h2>
             <span className="text-sm text-gray-500">
               {allCompanies.length} companies
             </span>
           </div>
+        )}
 
+        {results?.companies.length === 0 ||
+        (results === null && allCompanies.length === 0) ? (
+          <Card>
+            <CardContent className="text-center py-8">
+              <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-gray-500 mb-4">No companies found</p>
+              <Button asChild>
+                <Link href="/dashboard/companies/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Company
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allCompanies.map((company) => (
+            {(results?.companies || allCompanies).map((company) => (
               <Card
                 key={company.id}
-                className="hover:shadow-md transition-shadow"
+                className="hover:shadow-lg transition-shadow"
               >
-                <CardContent className="p-4">
+                <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 mb-2">
-                        {company.name}
-                      </h3>
+                    <div>
+                      <CardTitle className="text-lg">{company.name}</CardTitle>
                       {company.trading_name && (
-                        <p className="text-sm text-gray-600 mb-2">
+                        <p className="text-sm text-gray-600">
                           Trading as: {company.trading_name}
                         </p>
                       )}
-                      <p className="text-sm text-gray-600 mb-3">
-                        {company.description || "No description available"}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {company.industry && (
-                          <Badge variant="secondary" className="text-xs">
-                            {company.industry}
-                          </Badge>
-                        )}
-                        {company.country && (
-                          <Badge variant="outline" className="text-xs">
-                            {company.country}
-                          </Badge>
-                        )}
-                        {company.size && (
-                          <Badge variant="outline" className="text-xs">
-                            {company.size}
-                          </Badge>
-                        )}
-                        {company.type && (
-                          <Badge className="text-xs">{company.type}</Badge>
-                        )}
-                      </div>
                     </div>
-                    {company.website && (
-                      <a
-                        href={company.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-2 text-blue-600 hover:text-blue-800"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
+                    {company.type && (
+                      <Badge className={getTypeColor(company.type)}>
+                        {company.type}
+                      </Badge>
                     )}
                   </div>
-                  <div className="mt-3 text-xs text-gray-500">
-                    Created: {new Date(company.created_at).toLocaleDateString()}
+                </CardHeader>
+                <CardContent>
+                  {company.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {company.description}
+                    </p>
+                  )}
+                  <div className="space-y-2">
+                    {company.industry && (
+                      <div className="flex items-center text-sm">
+                        <span className="font-medium text-gray-700">
+                          Industry:
+                        </span>
+                        <span className="ml-2 text-gray-600">
+                          {company.industry}
+                        </span>
+                      </div>
+                    )}
+                    {company.country && (
+                      <div className="flex items-center text-sm">
+                        <span className="font-medium text-gray-700">
+                          Country:
+                        </span>
+                        <span className="ml-2 text-gray-600">
+                          {company.country}
+                        </span>
+                      </div>
+                    )}
+                    {company.size && (
+                      <div className="flex items-center text-sm">
+                        <span className="font-medium text-gray-700">Size:</span>
+                        <span className="ml-2 text-gray-600">
+                          {company.size}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    {company.website && (
+                      <Button size="sm" variant="outline" asChild>
+                        <a
+                          href={company.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center"
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          Website
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* No Companies Message */}
-      {!results && allCompanies.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Building2 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No Companies Found
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Upload content to create companies, or search for existing ones.
-            </p>
-            <Link href="/dashboard/upload">
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Upload Content
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+      {/* Related Content */}
+      {results?.relatedContent && results.relatedContent.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">Related Content</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {results.relatedContent.map((content) => {
+              const typedContent = content as {
+                id: string;
+                title: string;
+                description?: string;
+                content_type?: string;
+                status: string;
+              };
+              return (
+                <Card
+                  key={typedContent.id}
+                  className="hover:shadow-md transition-shadow"
+                >
+                  <CardContent className="p-4">
+                    <h4 className="font-medium text-gray-900">
+                      {typedContent.title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {typedContent.description || "No description available"}
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {typedContent.content_type?.split("_").join(" ")}
+                      </Badge>
+                      <Badge className="text-xs">{typedContent.status}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );

@@ -15,22 +15,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch all companies
+    // Fetch all companies - using only basic fields that we know exist
     const { data: companies, error: companiesError } = await supabase
       .from("companies")
-      .select(`
-        id,
-        name,
-        description,
-        industry,
-        country,
-        size,
-        type,
-        website,
-        created_at,
-        updated_at
-      `)
-      .order("created_at", { ascending: false });
+      .select("id, name, description, industry, country, size, type")
+      .order("id", { ascending: false });
 
     if (companiesError) {
       console.error("Error fetching companies:", companiesError);
