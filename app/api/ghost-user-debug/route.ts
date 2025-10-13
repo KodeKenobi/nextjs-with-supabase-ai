@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     // Test if we can query content_items for this specific user
     const { data: userContent, error: contentError } = await supabaseAdmin
       .from("content_items")
-      .select("id, title, user_id")
-      .eq("user_id", user.id)
+      .select("id, title, userId")
+      .eq("userId", user.id)
       .limit(5);
 
     console.log("📄 User content query:", {
@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       contentType: "TEXT",
       source: "DIRECT_INPUT",
       status: "PENDING",
-      user_id: user.id,
-      company_id: null,
+      userId: user.id,
+      companyId: null,
     };
 
     const { data: insertedContent, error: insertError } = await supabaseAdmin
