@@ -148,10 +148,12 @@ export async function POST(request: NextRequest) {
       } else {
         console.log("🏗️ Creating new company:", companyName);
 
-        // Create new company
+        // Create new company with explicit UUID
+        const companyId = crypto.randomUUID();
         const { data: newCompany, error: createError } = await supabaseAdmin
           .from("companies")
           .insert({
+            id: companyId,
             name: companyName,
             description: `Company created from content upload: ${title}`,
             industry: "Unknown",
@@ -176,7 +178,6 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        companyId = newCompany.id;
         console.log("✅ Created new company:", companyId);
       }
     }
@@ -184,9 +185,11 @@ export async function POST(request: NextRequest) {
     // Create content item in database
     console.log("📄 Creating content item with companyId:", companyId);
 
+    const contentId = crypto.randomUUID();
     const { data: contentItem, error: contentError } = await supabaseAdmin
       .from("content_items")
       .insert({
+        id: contentId,
         title,
         description,
         content_type: contentType,
@@ -222,10 +225,10 @@ export async function POST(request: NextRequest) {
     // For now, we'll simulate immediate processing
     if (source === "DIRECT_INPUT" && text && text.trim()) {
       // Process text directly
-      await processTextContent(contentItem.id, text, user.id);
+      await processTextContent(contentId, text, user.id);
     } else if (cloudStoragePath) {
       // Process uploaded file
-      await processFileContent(contentItem.id, cloudStoragePath, user.id);
+      await processFileContent(contentId, cloudStoragePath, user.id);
     } else {
       // No content to process - just mark as completed
       await supabaseAdmin
@@ -234,7 +237,7 @@ export async function POST(request: NextRequest) {
           status: "COMPLETED",
           processed_at: new Date().toISOString(),
         })
-        .eq("id", contentItem.id);
+        .eq("id", contentId);
     }
 
     if (contentError) {
@@ -248,7 +251,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("✅ Content item created successfully:", contentItem.id);
+    console.log("✅ Content item created successfully:", contentId);
 
     // Start processing (this would trigger background job in production)
     // For now, we'll simulate immediate processing
@@ -257,11 +260,11 @@ export async function POST(request: NextRequest) {
     if (source === "DIRECT_INPUT" && text && text.trim()) {
       console.log("📝 Processing text content");
       // Process text directly
-      await processTextContent(contentItem.id, text, user.id);
+      await processTextContent(contentId, text, user.id);
     } else if (cloudStoragePath) {
       console.log("📁 Processing uploaded file");
       // Process uploaded file
-      await processFileContent(contentItem.id, cloudStoragePath, user.id);
+      await processFileContent(contentId, cloudStoragePath, user.id);
     } else {
       console.log("✅ No content to process - marking as completed");
       // No content to process - just mark as completed
@@ -271,7 +274,7 @@ export async function POST(request: NextRequest) {
           status: "COMPLETED",
           processed_at: new Date().toISOString(),
         })
-        .eq("id", contentItem.id);
+        .eq("id", contentId);
     }
 
     console.log("🎉 Upload completed successfully!");
