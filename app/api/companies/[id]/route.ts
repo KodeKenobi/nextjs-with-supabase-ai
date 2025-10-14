@@ -42,9 +42,9 @@ export async function GET(
         business_insights(*)
       `
       )
-      .eq("companyId", companyId)
-      .eq("userId", user.id)
-      .order("createdAt", { ascending: false });
+      .eq("companyid", companyId)
+      .eq("userid", user.id)
+      .order("createdat", { ascending: false });
 
     if (contentError) {
       console.error("Error fetching content:", contentError);

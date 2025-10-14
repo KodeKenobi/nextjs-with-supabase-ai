@@ -149,11 +149,11 @@ export async function POST(request: NextRequest) {
         console.log("🏗️ Creating new company:", companyName);
 
         // Create new company with explicit UUID
-        const companyId = crypto.randomUUID();
+        const newCompanyId = crypto.randomUUID();
         const { data: newCompany, error: createError } = await supabaseAdmin
           .from("companies")
           .insert({
-            id: companyId,
+            id: newCompanyId,
             name: companyName,
             description: `Company created from content upload: ${title}`,
             industry: "Unknown",
@@ -178,6 +178,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        companyId = newCompanyId;
         console.log("✅ Created new company:", companyId);
       }
     }
@@ -192,11 +193,11 @@ export async function POST(request: NextRequest) {
         id: contentId,
         title,
         description,
-        contentType: contentType,
+        contenttype: contentType,
         source: source,
         status: "PENDING",
-        companyId: companyId,
-        userId: user.id,
+        companyid: companyId,
+        userid: user.id,
       })
       .select()
       .single();
@@ -209,38 +210,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (contentError) {
-      console.error("Content creation error:", contentError);
-      return NextResponse.json(
-        { error: "Failed to create content item" },
-        { status: 500 }
-      );
-    }
-
-    // Start processing (this would trigger background job in production)
-    // For now, we'll simulate immediate processing
-    if (source === "DIRECT_INPUT" && text && text.trim()) {
-      // Process text directly
-      await processTextContent(contentId, text, user.id);
-    } else if (cloudStoragePath) {
-      // Process uploaded file
-      await processFileContent(contentId, cloudStoragePath, user.id);
-    } else {
-      // No content to process - just mark as completed
-      await supabaseAdmin
-        .from("content_items")
-        .update({
-          status: "COMPLETED",
-          processed_at: new Date().toISOString(),
-        })
-        .eq("id", contentId);
-    }
-
-    if (contentError) {
       console.error("❌ Content creation error:", contentError);
       return NextResponse.json(
         {
           error: "Failed to create content item",
-          details: (contentError as any)?.message || "Unknown error",
+          details: contentError.message || "Unknown error",
         },
         { status: 500 }
       );
@@ -268,7 +242,7 @@ export async function POST(request: NextRequest) {
           .from("content_items")
           .update({
             status: "COMPLETED",
-            processed_at: new Date().toISOString(),
+            processedat: new Date().toISOString(),
           })
           .eq("id", contentId);
       }
@@ -285,10 +259,10 @@ export async function POST(request: NextRequest) {
         id: contentId,
         title,
         description,
-        contentType: contentType,
+        contenttype: contentType,
         source: source,
-        companyId: companyId,
-        userId: user.id,
+        companyid: companyId,
+        userid: user.id,
         status: "PENDING",
       },
       message: "Content uploaded successfully and processing started",
@@ -320,17 +294,17 @@ async function processTextContent(
 
   // Create transcription
   await supabaseAdmin.from("transcriptions").insert({
-    content_item_id: contentId,
+    contentItemId: contentId,
     content: text,
     language: "en",
     confidence: 1.0,
-    word_count: text.split(" ").length,
+    wordCount: text.split(" ").length,
   });
 
   // Create mock business insights
   await supabaseAdmin.from("business_insights").insert({
-    content_item_id: contentId,
-    user_id: userId,
+    contentItemId: contentId,
+    userId: userId,
     category: "BUSINESS_MODEL",
     title: "Text Analysis Complete",
     content: "Content has been processed and analyzed for business insights.",
@@ -343,7 +317,7 @@ async function processTextContent(
     .from("content_items")
     .update({
       status: "COMPLETED",
-      processed_at: new Date().toISOString(),
+      processedat: new Date().toISOString(),
     })
     .eq("id", contentId);
 }
@@ -359,7 +333,7 @@ async function processFileContent(
     .from("content_items")
     .update({
       status: "COMPLETED",
-      processed_at: new Date().toISOString(),
+      processedat: new Date().toISOString(),
     })
     .eq("id", contentId);
 }
