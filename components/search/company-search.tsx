@@ -8,6 +8,24 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Building2, ExternalLink, Plus } from "lucide-react";
 import Link from "next/link";
 
+interface BusinessInsight {
+  id: string;
+  category: string;
+  title: string;
+  content: string;
+  priority: string;
+  confidence: number;
+}
+
+interface ContentItem {
+  id: string;
+  title: string;
+  description?: string;
+  contenttype: string;
+  status: string;
+  createdat: string;
+}
+
 interface Company {
   id: string;
   name: string;
@@ -19,6 +37,11 @@ interface Company {
   size?: string;
   type?: string;
   createdAt?: string;
+  insights?: BusinessInsight[];
+  content_items?: ContentItem[];
+  contentTypes?: Record<string, number>;
+  totalContent?: number;
+  totalInsights?: number;
 }
 
 interface SearchResults {
@@ -191,41 +214,113 @@ export default function CompanySearch() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {company.description && (
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {company.description}
-                    </p>
-                  )}
-                  <div className="space-y-2">
-                    {company.industry && (
-                      <div className="flex items-center text-sm">
-                        <span className="font-medium text-gray-700">
-                          Industry:
-                        </span>
-                        <span className="ml-2 text-gray-600">
-                          {company.industry}
-                        </span>
-                      </div>
-                    )}
-                    {company.country && (
-                      <div className="flex items-center text-sm">
-                        <span className="font-medium text-gray-700">
-                          Country:
-                        </span>
-                        <span className="ml-2 text-gray-600">
-                          {company.country}
-                        </span>
-                      </div>
-                    )}
-                    {company.size && (
-                      <div className="flex items-center text-sm">
-                        <span className="font-medium text-gray-700">Size:</span>
-                        <span className="ml-2 text-gray-600">
-                          {company.size}
-                        </span>
-                      </div>
-                    )}
+                  {/* Content Stats */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                      <span className="flex items-center">
+                        <Building2 className="h-4 w-4 mr-1" />
+                        {company.totalContent || 0} content
+                      </span>
+                      <span className="flex items-center">
+                        💡 {company.totalInsights || 0} insights
+                      </span>
+                    </div>
                   </div>
+
+                  {/* Top Insights */}
+                  {company.insights && company.insights.length > 0 && (
+                    <div className="mb-3">
+                      <h4 className="text-sm font-medium text-gray-900 mb-2">
+                        Key Insights:
+                      </h4>
+                      <div className="space-y-2">
+                        {company.insights.slice(0, 2).map((insight) => (
+                          <div
+                            key={insight.id}
+                            className="bg-gray-50 rounded-md p-2"
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-gray-700">
+                                {insight.category.replace("_", " ")}
+                              </span>
+                              <Badge
+                                variant="secondary"
+                                className={`text-xs ${
+                                  insight.priority === "HIGH"
+                                    ? "bg-red-100 text-red-800"
+                                    : insight.priority === "MEDIUM"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-green-100 text-green-800"
+                                }`}
+                              >
+                                {insight.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 line-clamp-2">
+                              {insight.content}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Content Types */}
+                  {company.contentTypes &&
+                    Object.keys(company.contentTypes).length > 0 && (
+                      <div className="mb-3">
+                        <h4 className="text-sm font-medium text-gray-900 mb-2">
+                          Content Types:
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {Object.entries(company.contentTypes).map(
+                            ([type, count]) => (
+                              <Badge
+                                key={type}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {type} ({count})
+                              </Badge>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Show content-based description from first content item */}
+                  {company.content_items &&
+                    company.content_items.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-sm text-gray-600 line-clamp-3">
+                          {company.content_items[0].description ||
+                            company.content_items[0].title ||
+                            "Content uploaded for analysis"}
+                        </p>
+                      </div>
+                    )}
+
+                  {/* Fallback to basic info if no content */}
+                  {(!company.content_items ||
+                    company.content_items.length === 0) && (
+                    <div className="space-y-2">
+                      {company.description && (
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {company.description}
+                        </p>
+                      )}
+                      {company.industry && (
+                        <div className="flex items-center text-sm">
+                          <span className="font-medium text-gray-700">
+                            Industry:
+                          </span>
+                          <span className="ml-2 text-gray-600">
+                            {company.industry}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="mt-4 flex gap-2">
                     <Button
                       size="sm"

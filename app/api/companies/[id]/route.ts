@@ -20,24 +20,27 @@ export async function GET(
 
     const { id: companyId } = await params;
 
-    // Fetch company details
-    const { data: company, error: companyError } = await supabase
-      .from("companies")
-      .select("*")
-      .eq("id", companyId)
-      .single();
-
-    if (companyError) {
-      console.error("Error fetching company:", companyError);
-      return NextResponse.json({ error: "Company not found" }, { status: 404 });
-    }
-
-    // Fetch related content for this company
+    // Fetch company details and content in one query
     const { data: contentItems, error: contentError } = await supabase
       .from("content_items")
       .select(
         `
-        *,
+        id,
+        title,
+        description,
+        contenttype,
+        status,
+        createdat,
+        companyid,
+        companies!inner(
+          id,
+          name,
+          description,
+          industry,
+          country,
+          size,
+          type
+        ),
         transcriptions(*),
         business_insights(*)
       `
@@ -48,8 +51,15 @@ export async function GET(
 
     if (contentError) {
       console.error("Error fetching content:", contentError);
-      // Don't fail the request if content fetch fails, just return empty array
+      return NextResponse.json({ error: "Company not found" }, { status: 404 });
     }
+
+    if (!contentItems || contentItems.length === 0) {
+      return NextResponse.json({ error: "Company not found" }, { status: 404 });
+    }
+
+    // Get company details from the first content item
+    const company = contentItems[0].companies;
 
     return NextResponse.json({
       company,

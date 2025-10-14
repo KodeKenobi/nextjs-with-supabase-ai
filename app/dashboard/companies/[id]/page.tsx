@@ -42,10 +42,12 @@ interface ContentItem {
   id: string;
   title: string;
   description?: string;
-  contentType?: string;
+  contenttype?: string;
+  contentType?: string; // fallback
   source?: string;
   status?: string;
-  createdAt?: string;
+  createdat?: string;
+  createdAt?: string; // fallback
   transcriptions?: any[];
   business_insights?: any[];
 }
@@ -306,11 +308,12 @@ export default function CompanyDetailsPage() {
                       )}
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="secondary" className="text-xs">
-                          {item.contentType?.split("_").join(" ")}
+                          {item.contenttype?.split("_").join(" ") ||
+                            item.contentType?.split("_").join(" ")}
                         </Badge>
                         <Badge className="text-xs">{item.status}</Badge>
                         <span className="text-xs text-gray-500">
-                          {formatDate(item.createdAt)}
+                          {formatDate(item.createdat || item.createdAt)}
                         </span>
                       </div>
                     </div>
