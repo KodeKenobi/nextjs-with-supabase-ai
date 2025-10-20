@@ -10,10 +10,16 @@ import {
   transcribeYouTubeVideoFallback,
 } from "./youtube-fallback";
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazily initialize OpenAI client to avoid build-time env requirements
+let openAIClient: OpenAI | null = null;
+function getOpenAIClient(): OpenAI {
+  if (!openAIClient) {
+    openAIClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openAIClient;
+}
 
 export interface YouTubeInfo {
   title: string;
@@ -214,6 +220,7 @@ export async function transcribeYouTubeVideo(
 
     // Transcribe using OpenAI Whisper
     console.log("🤖 Starting transcription with OpenAI Whisper...");
+    const openai = getOpenAIClient();
     const transcription = await openai.audio.transcriptions.create({
       file: createReadStream(tempFilePath),
       model: "whisper-1",
