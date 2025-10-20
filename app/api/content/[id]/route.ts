@@ -1,9 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-export async function GET() {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = await createClient();
+    const { id } = await params;
 
     // Get the current user
     const {
@@ -15,8 +19,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch ALL content items from ALL companies
-    const { data: contentItems, error: contentError } = await supabase
+    // Fetch content item for the user
+    const { data: contentItem, error: contentError } = await supabase
       .from("content_items")
       .select(
         `
@@ -26,33 +30,28 @@ export async function GET() {
         companies(id, name, industry, description, country, size, type)
       `
       )
-      .order("createdat", { ascending: false });
-
-    console.log("🔍 Content API Debug:", {
-      contentItemsCount: contentItems?.length || 0,
-      firstItem: contentItems?.[0],
-      firstItemCompany: contentItems?.[0]?.companies,
-      error: contentError?.message,
-    });
+      .eq("id", id)
+      .eq("userid", user.id)
+      .single();
 
     if (contentError) {
-      console.error("Error fetching content:", contentError);
+      console.error("Error fetching content item:", contentError);
       return NextResponse.json(
         {
-          error: "Failed to fetch content",
+          error: "Content not found",
           details: contentError.message,
-          code: contentError.code,
         },
-        { status: 500 }
+        { status: 404 }
       );
     }
 
-    return NextResponse.json(contentItems || []);
+    return NextResponse.json(contentItem);
   } catch (error) {
     console.error("Content fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch content" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
+

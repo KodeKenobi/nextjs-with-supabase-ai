@@ -5,7 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Building2, ExternalLink, Plus } from "lucide-react";
+import {
+  Search,
+  Building2,
+  ExternalLink,
+  Plus,
+  RefreshCw,
+  Trash2,
+  AlertTriangle,
+} from "lucide-react";
 import Link from "next/link";
 
 interface BusinessInsight {
@@ -56,8 +64,11 @@ export default function CompanySearch() {
   const [allCompanies, setAllCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch all companies on component mount
+  // Fetch all companies on component mount and when refreshKey changes
   useEffect(() => {
     const fetchAllCompanies = async () => {
       try {
@@ -77,7 +88,45 @@ export default function CompanySearch() {
     };
 
     fetchAllCompanies();
+  }, [refreshKey]);
+
+  // Listen for company creation events
+  useEffect(() => {
+    const handleCompanyCreated = () => {
+      setRefreshKey((prev) => prev + 1);
+    };
+
+    window.addEventListener("companyCreated", handleCompanyCreated);
+    return () =>
+      window.removeEventListener("companyCreated", handleCompanyCreated);
   }, []);
+
+  const handleDeleteCompany = async (companyId: string) => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/companies?id=${companyId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setRefreshKey((prev) => prev + 1);
+        setDeleteConfirm(null);
+        // Show success message if there's one
+        if (data.message) {
+          // You could add a success state here if needed
+          console.log("Success:", data.message);
+        }
+      } else {
+        setError(data.error || "Failed to delete company");
+      }
+    } catch (err) {
+      setError("Failed to delete company");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -328,6 +377,7 @@ export default function CompanySearch() {
                         e.stopPropagation();
                         window.location.href = `/dashboard/companies/${company.id}`;
                       }}
+                      className="flex-1"
                     >
                       View Details
                     </Button>
@@ -345,6 +395,17 @@ export default function CompanySearch() {
                         </a>
                       </Button>
                     )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirm(company.id);
+                      }}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -388,6 +449,51 @@ export default function CompanySearch() {
                 </Card>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <AlertTriangle className="h-6 w-6 text-red-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-900">
+                Delete Company
+              </h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this company? This will also
+              delete all associated content items, insights, and transcriptions.
+              This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirm(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => handleDeleteCompany(deleteConfirm)}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       )}

@@ -43,9 +43,9 @@ interface Stats {
 interface ContentItem {
   id: string;
   title: string;
-  contentType: string;
+  contenttype: string;
   status: string;
-  createdAt: string;
+  createdat: string;
   transcription?: {
     id: string;
     content: string;
@@ -64,7 +64,7 @@ interface Insight {
   category: string;
   title: string;
   priority: string;
-  createdAt: string;
+  createdat: string;
 }
 
 interface Report {
@@ -73,7 +73,7 @@ interface Report {
   totalContradictions?: number;
   totalGaps?: number;
   priorityGaps?: number;
-  createdAt: string;
+  createdat: string;
 }
 
 const getPriorityColor = (priority: string) => {
@@ -136,6 +136,13 @@ export default function DashboardOverview({ user }: { user: User }) {
       const contentData = contentResponse.ok
         ? await contentResponse.json()
         : [];
+      
+      console.log("🔍 Dashboard Recent Content Data:", {
+        responseOk: contentResponse.ok,
+        contentCount: contentData?.length || 0,
+        firstItem: contentData?.[0],
+        firstItemCompany: contentData?.[0]?.companies
+      });
 
       // Fetch business insights
       const insightsResponse = await fetch("/api/insights");
@@ -171,7 +178,9 @@ export default function DashboardOverview({ user }: { user: User }) {
       });
 
       // Set recent data (last 5 items)
-      setRecentContent((contentData as ContentItem[]).slice(0, 5) || []);
+      const recentContentData = (contentData as ContentItem[]).slice(0, 5) || [];
+      console.log("🔍 Recent Content (first 5):", recentContentData);
+      setRecentContent(recentContentData);
       setRecentInsights((insightsData as Insight[]).slice(0, 5) || []);
       setConsistencyReport((consistencyData as Report[])[0] || null);
       setGapAnalysisReport((gapsData as Report[])[0] || null);
@@ -361,13 +370,13 @@ export default function DashboardOverview({ user }: { user: User }) {
                         </h4>
                         <div className="flex items-center mt-1 space-x-2">
                           <Badge variant="secondary" className="text-xs">
-                            {item.contentType.replace("_", " ")}
+                            {item.contenttype?.replace("_", " ") || "Unknown"}
                           </Badge>
                           <Badge className={getStatusColor(item.status)}>
                             {item.status}
                           </Badge>
                           <span className="text-xs text-gray-500">
-                            {formatDistanceToNow(new Date(item.createdAt), {
+                            {formatDistanceToNow(new Date(item.createdat), {
                               addSuffix: true,
                             })}
                           </span>
@@ -432,7 +441,7 @@ export default function DashboardOverview({ user }: { user: User }) {
                             </Badge>
                             <span className="text-xs text-gray-500">
                               {formatDistanceToNow(
-                                new Date(insight.createdAt),
+                                new Date(insight.createdat),
                                 {
                                   addSuffix: true,
                                 }
@@ -468,7 +477,7 @@ export default function DashboardOverview({ user }: { user: User }) {
                     <p className="text-sm text-gray-600">
                       Last updated:{" "}
                       {formatDistanceToNow(
-                        new Date(consistencyReport.createdAt),
+                        new Date(consistencyReport.createdat),
                         { addSuffix: true }
                       )}
                     </p>
@@ -518,7 +527,7 @@ export default function DashboardOverview({ user }: { user: User }) {
                     <p className="text-sm text-gray-600">
                       Last updated:{" "}
                       {formatDistanceToNow(
-                        new Date(gapAnalysisReport.createdAt),
+                        new Date(gapAnalysisReport.createdat),
                         { addSuffix: true }
                       )}
                     </p>

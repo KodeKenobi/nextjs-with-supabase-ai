@@ -15,11 +15,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch consistency reports for the user
+    // Fetch ALL consistency reports from ALL users
     const { data: reports, error: reportsError } = await supabase
       .from("consistency_reports")
       .select("*")
-      .eq("userId", user.id)
       .order("createdAt", { ascending: false });
 
     if (reportsError) {

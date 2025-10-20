@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import DashboardNavigation from "@/components/dashboard/navigation";
 import CompanySearch from "@/components/search/company-search";
+import CompanyCreationForm from "@/components/companies/company-creation-form";
 
 export default async function CompaniesPage() {
   const supabase = await createClient();
@@ -23,10 +24,21 @@ export default async function CompaniesPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Companies</h1>
             <p className="mt-2 text-gray-600">
-              Search and manage company information
+              View all companies and manage company information
             </p>
           </div>
-          <CompanySearch />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Company Creation Form */}
+            <div className="lg:col-span-1">
+              <CompanyCreationForm />
+            </div>
+
+            {/* Company Search */}
+            <div className="lg:col-span-2">
+              <CompanySearch />
+            </div>
+          </div>
         </div>
       </main>
     </div>

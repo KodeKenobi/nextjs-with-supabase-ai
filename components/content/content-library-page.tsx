@@ -24,20 +24,20 @@ interface ContentItem {
   id: string;
   title: string;
   description?: string;
-  content_type: string;
+  contenttype: string;
   status: string;
-  created_at: string;
-  processed_at?: string;
-  company_id?: string;
+  createdat: string;
+  processedat?: string;
+  companyid?: string;
   companies?: {
     id: string;
     name: string;
     industry?: string;
   };
-  transcription?: {
-    word_count?: number;
+  transcriptions?: {
+    wordCount?: number;
     language?: string;
-  };
+  }[];
   business_insights?: {
     id: string;
     priority: string;
@@ -60,6 +60,8 @@ export default function ContentLibraryPage() {
       const response = await fetch("/api/content");
       if (response.ok) {
         const data = await response.json();
+        console.log("📊 Content Library Data:", data);
+        console.log("📊 First item companies:", data[0]?.companies);
         setContent(data);
       } else {
         console.error("Failed to fetch content");
@@ -124,7 +126,7 @@ export default function ContentLibraryPage() {
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType =
-      filterType === "all" || item.content_type.toLowerCase() === filterType;
+      filterType === "all" || item.contenttype.toLowerCase() === filterType;
     const matchesStatus =
       filterStatus === "all" || item.status.toLowerCase() === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
@@ -235,7 +237,7 @@ export default function ContentLibraryPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    {getContentIcon(item.content_type)}
+                    {getContentIcon(item.contenttype)}
                     <CardTitle className="text-lg line-clamp-1">
                       {item.title}
                     </CardTitle>
@@ -269,13 +271,15 @@ export default function ContentLibraryPage() {
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {formatDistanceToNow(new Date(item.created_at), {
+                      {formatDistanceToNow(new Date(item.createdat), {
                         addSuffix: true,
                       })}
                     </span>
-                    {item.transcription?.word_count && (
-                      <span>{item.transcription.word_count} words</span>
-                    )}
+                    {item.transcriptions &&
+                      item.transcriptions.length > 0 &&
+                      item.transcriptions[0]?.wordCount && (
+                        <span>{item.transcriptions[0].wordCount} words</span>
+                      )}
                   </div>
 
                   {/* Business Insights */}

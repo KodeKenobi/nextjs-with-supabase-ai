@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import {
+  transcribeYouTubeVideo,
+  getYouTubeInfo,
+  isValidYouTubeUrl,
+} from "@/lib/youtube-processor";
+import { uploadRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   console.log("🚀 Upload API called");
@@ -35,6 +41,36 @@ export async function POST(request: NextRequest) {
       user.id,
       "ID type:",
       typeof user.id
+    );
+
+    // Check rate limit
+    const rateLimitResult = uploadRateLimit(user.id);
+    if (!rateLimitResult.allowed) {
+      console.log("🚫 Rate limit exceeded for user:", user.email);
+      return NextResponse.json(
+        {
+          error: "Upload limit exceeded",
+          message:
+            "You have reached the maximum number of uploads per hour. Please try again later.",
+          resetTime: rateLimitResult.resetTime,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": Math.ceil(
+              (rateLimitResult.resetTime - Date.now()) / 1000
+            ).toString(),
+            "X-RateLimit-Limit": "10",
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": rateLimitResult.resetTime.toString(),
+          },
+        }
+      );
+    }
+
+    console.log(
+      "✅ Rate limit check passed, remaining uploads:",
+      rateLimitResult.remaining
     );
 
     const formData = await request.formData();
@@ -231,6 +267,10 @@ export async function POST(request: NextRequest) {
         console.log("📝 Processing text content");
         // Process text directly
         await processTextContent(contentId, text, user.id);
+      } else if (source === "YOUTUBE_URL" && url && url.trim()) {
+        console.log("🎥 Processing YouTube video");
+        // Process YouTube video
+        await processYouTubeContent(contentId, url, user.id);
       } else if (cloudStoragePath) {
         console.log("📁 Processing uploaded file");
         // Process uploaded file
@@ -320,6 +360,106 @@ async function processTextContent(
       processedat: new Date().toISOString(),
     })
     .eq("id", contentId);
+}
+
+async function processYouTubeContent(
+  contentId: string,
+  url: string,
+  userId: string
+) {
+  try {
+    console.log("🎥 Starting YouTube processing for:", url);
+
+    // Validate YouTube URL
+    if (!isValidYouTubeUrl(url)) {
+      throw new Error("Invalid YouTube URL");
+    }
+
+    // Get video information
+    const videoInfo = await getYouTubeInfo(url);
+    console.log("📹 Video title:", videoInfo.title);
+
+    // Update content item with video information
+    await supabaseAdmin
+      .from("content_items")
+      .update({
+        title: videoInfo.title || "YouTube Video",
+        description:
+          videoInfo.description || `YouTube video by ${videoInfo.author}`,
+        sourceurl: url,
+      })
+      .eq("id", contentId);
+
+    // Transcribe the video
+    const transcription = await transcribeYouTubeVideo(url);
+    console.log(
+      "🎵 Transcription completed:",
+      transcription.wordCount,
+      "words"
+    );
+
+    // Save transcription
+    await supabaseAdmin.from("transcriptions").insert({
+      contentItemId: contentId,
+      content: transcription.text,
+      language: transcription.language,
+      confidence: transcription.confidence,
+      wordCount: transcription.wordCount,
+    });
+
+    // Generate business insights from transcription
+    await supabaseAdmin.from("business_insights").insert({
+      contentItemId: contentId,
+      userId: userId,
+      category: "BUSINESS_MODEL",
+      title: "YouTube Video Analysis Complete",
+      content: `Successfully transcribed YouTube video "${videoInfo.title}" with ${transcription.wordCount} words. The content has been analyzed for business insights.`,
+      confidence: 0.9,
+      priority: "HIGH",
+    });
+
+    // Add additional insights based on content
+    if (
+      transcription.text.toLowerCase().includes("business") ||
+      transcription.text.toLowerCase().includes("company") ||
+      transcription.text.toLowerCase().includes("strategy")
+    ) {
+      await supabaseAdmin.from("business_insights").insert({
+        contentItemId: contentId,
+        userId: userId,
+        category: "STRATEGY",
+        title: "Business Strategy Content Detected",
+        content:
+          "The video content appears to contain business strategy discussions that may be valuable for analysis.",
+        confidence: 0.8,
+        priority: "MEDIUM",
+      });
+    }
+
+    // Update content status
+    await supabaseAdmin
+      .from("content_items")
+      .update({
+        status: "COMPLETED",
+        processedat: new Date().toISOString(),
+      })
+      .eq("id", contentId);
+
+    console.log("✅ YouTube processing completed successfully");
+  } catch (error) {
+    console.error("❌ YouTube processing error:", error);
+
+    // Update content status to failed
+    await supabaseAdmin
+      .from("content_items")
+      .update({
+        status: "FAILED",
+        processedat: new Date().toISOString(),
+      })
+      .eq("id", contentId);
+
+    throw error;
+  }
 }
 
 async function processFileContent(

@@ -15,11 +15,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch gap analysis reports for the user
+    // Fetch ALL gap analysis reports from ALL users
     const { data: reports, error: reportsError } = await supabase
       .from("gap_analysis_reports")
       .select("*")
-      .eq("userId", user.id)
       .order("createdAt", { ascending: false });
 
     if (reportsError) {

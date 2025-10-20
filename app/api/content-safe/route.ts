@@ -15,12 +15,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Try simple content fetch first (without joins)
+    // Try simple content fetch first (without joins) - ALL content
     const { data: contentItems, error: contentError } = await supabase
       .from("content_items")
       .select("*")
-      .eq("userId", user.id)
-      .order("createdAt", { ascending: false });
+      .order("createdat", { ascending: false });
 
     if (contentError) {
       console.error("Error fetching content:", contentError);
@@ -49,13 +48,13 @@ export async function GET() {
           .select("*")
           .eq("contentItemId", item.id);
 
-        // Get company info if companyId exists
+        // Get company info if companyid exists
         let company = null;
-        if (item.companyId) {
+        if (item.companyid) {
           const { data: companyData } = await supabase
             .from("companies")
             .select("id, name, industry")
-            .eq("id", item.companyId)
+            .eq("id", item.companyid)
             .single();
           company = companyData;
         }

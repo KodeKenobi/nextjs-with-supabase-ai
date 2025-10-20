@@ -30,20 +30,26 @@ interface ContentItem {
   id: string;
   title: string;
   description?: string;
-  content_type: string;
+  contenttype: string;
   status: string;
-  created_at: string;
-  processed_at?: string;
-  file_name?: string;
-  file_size?: number;
+  createdat: string;
+  processedat?: string;
+  filename?: string;
+  filesize?: number;
   duration?: number;
-  transcription?: {
+  companyid?: string;
+  companies?: {
+    id: string;
+    name: string;
+    industry?: string;
+  };
+  transcriptions?: {
     id: string;
     content: string;
     language?: string;
     confidence?: number;
-    word_count?: number;
-  };
+    wordCount?: number;
+  }[];
   business_insights?: {
     id: string;
     category: string;
@@ -64,48 +70,13 @@ export default function ContentDetailPage({
 
   const fetchContent = useCallback(async () => {
     try {
-      // For now, return mock data - will be implemented with Supabase
-      setContent({
-        id: contentId,
-        title: "Sample Content",
-        description:
-          "This is a sample content item for demonstration purposes.",
-        content_type: "AUDIO",
-        status: "COMPLETED",
-        created_at: new Date().toISOString(),
-        processed_at: new Date().toISOString(),
-        file_name: "sample-audio.mp3",
-        file_size: 1024000,
-        duration: 180,
-        transcription: {
-          id: "1",
-          content:
-            "This is a sample transcription of the audio content. It contains important business information that can be analyzed for insights.",
-          language: "en",
-          confidence: 0.95,
-          word_count: 25,
-        },
-        business_insights: [
-          {
-            id: "1",
-            category: "BUSINESS_MODEL",
-            title: "Revenue Model Identified",
-            content:
-              "The content mentions a subscription-based revenue model with tiered pricing.",
-            priority: "HIGH",
-            confidence: 0.88,
-          },
-          {
-            id: "2",
-            category: "MARKETING",
-            title: "Target Market Mentioned",
-            content:
-              "The target market appears to be small to medium-sized businesses.",
-            priority: "MEDIUM",
-            confidence: 0.75,
-          },
-        ],
-      });
+      const response = await fetch(`/api/content/${contentId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setContent(data);
+      } else {
+        setError("Failed to load content");
+      }
     } catch (err) {
       setError("Failed to load content");
       console.error("Error fetching content:", err);
@@ -232,7 +203,7 @@ export default function ContentDetailPage({
             </Link>
           </Button>
           <div className="flex items-center gap-3">
-            {getContentIcon(content.content_type)}
+            {getContentIcon(content.contenttype)}
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
                 {content.title}
@@ -270,10 +241,10 @@ export default function ContentDetailPage({
             <CardContent>
               <div className="bg-gray-100 rounded-lg p-8 text-center">
                 <div className="mb-4">
-                  {getContentIcon(content.content_type)}
+                  {getContentIcon(content.contenttype)}
                 </div>
                 <p className="text-gray-600 mb-4">
-                  {content.file_name} • {formatFileSize(content.file_size)} •{" "}
+                  {content.filename} • {formatFileSize(content.filesize)} •{" "}
                   {formatDuration(content.duration)}
                 </p>
                 <Button
@@ -300,7 +271,7 @@ export default function ContentDetailPage({
           </Card>
 
           {/* Transcription */}
-          {content.transcription && (
+          {content.transcriptions && content.transcriptions.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -310,15 +281,15 @@ export default function ContentDetailPage({
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {content.transcription.word_count} words
+                    {content.transcriptions[0].wordCount} words
                   </span>
-                  {content.transcription.language && (
-                    <span>Language: {content.transcription.language}</span>
+                  {content.transcriptions[0].language && (
+                    <span>Language: {content.transcriptions[0].language}</span>
                   )}
-                  {content.transcription.confidence && (
+                  {content.transcriptions[0].confidence && (
                     <span>
                       Confidence:{" "}
-                      {Math.round(content.transcription.confidence * 100)}%
+                      {Math.round(content.transcriptions[0].confidence * 100)}%
                     </span>
                   )}
                 </div>
@@ -326,7 +297,7 @@ export default function ContentDetailPage({
               <CardContent>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-gray-700 leading-relaxed">
-                    {content.transcription.content}
+                    {content.transcriptions[0].content}
                   </p>
                 </div>
               </CardContent>
@@ -348,7 +319,7 @@ export default function ContentDetailPage({
               <div className="flex justify-between">
                 <span className="text-sm font-medium text-gray-700">Type:</span>
                 <span className="text-sm text-gray-600">
-                  {content.content_type.replace("_", " ")}
+                  {content.contenttype.replace("_", " ")}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -364,30 +335,30 @@ export default function ContentDetailPage({
                   Created:
                 </span>
                 <span className="text-sm text-gray-600">
-                  {formatDistanceToNow(new Date(content.created_at), {
+                  {formatDistanceToNow(new Date(content.createdat), {
                     addSuffix: true,
                   })}
                 </span>
               </div>
-              {content.processed_at && (
+              {content.processedat && (
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-700">
                     Processed:
                   </span>
                   <span className="text-sm text-gray-600">
-                    {formatDistanceToNow(new Date(content.processed_at), {
+                    {formatDistanceToNow(new Date(content.processedat), {
                       addSuffix: true,
                     })}
                   </span>
                 </div>
               )}
-              {content.file_name && (
+              {content.filename && (
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-700">
                     File:
                   </span>
                   <span className="text-sm text-gray-600 truncate ml-2">
-                    {content.file_name}
+                    {content.filename}
                   </span>
                 </div>
               )}

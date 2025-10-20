@@ -5,20 +5,17 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
-    // Test basic connection
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError) {
-      return NextResponse.json({ 
-        error: "Auth error", 
-        details: userError.message 
-      }, { status: 500 });
-    }
+    // Test basic connection (without requiring auth)
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ 
-        error: "No user found" 
-      }, { status: 401 });
+    if (userError) {
+      console.log(
+        "Auth error (expected when not logged in):",
+        userError.message
+      );
     }
 
     // Test if companies table exists
@@ -28,11 +25,14 @@ export async function GET() {
       .limit(1);
 
     if (companiesError) {
-      return NextResponse.json({ 
-        error: "Companies table error", 
-        details: companiesError.message,
-        code: companiesError.code
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Companies table error",
+          details: companiesError.message,
+          code: companiesError.code,
+        },
+        { status: 500 }
+      );
     }
 
     // Test if content_items table exists
@@ -42,26 +42,35 @@ export async function GET() {
       .limit(1);
 
     if (contentError) {
-      return NextResponse.json({ 
-        error: "Content items table error", 
-        details: contentError.message,
-        code: contentError.code
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Content items table error",
+          details: contentError.message,
+          code: contentError.code,
+        },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Database connection successful",
-      user: user.email,
+      auth: {
+        hasUser: !!user,
+        userEmail: user?.email || null,
+        authError: userError?.message || null,
+      },
       companiesCount: companies?.length || 0,
-      contentItemsCount: contentItems?.length || 0
+      contentItemsCount: contentItems?.length || 0,
     });
-
   } catch (error) {
     console.error("Database test error:", error);
-    return NextResponse.json({ 
-      error: "Database test failed", 
-      details: error instanceof Error ? error.message : "Unknown error"
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Database test failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }

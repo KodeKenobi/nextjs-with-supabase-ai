@@ -15,7 +15,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch business insights for the user
+    // Fetch ALL business insights from ALL users
     const { data: insights, error: insightsError } = await supabase
       .from("business_insights")
       .select(
@@ -28,7 +28,6 @@ export async function GET() {
         )
       `
       )
-      .eq("userId", user.id)
       .order("createdAt", { ascending: false });
 
     if (insightsError) {

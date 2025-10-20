@@ -41,6 +41,9 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [extractedTranscription, setExtractedTranscription] = useState("");
+  const [isExtractingTranscription, setIsExtractingTranscription] =
+    useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (
@@ -66,6 +69,41 @@ export default function UploadPage() {
     }
   };
 
+  const handleExtractTranscription = async () => {
+    if (!formData.url) return;
+
+    setIsExtractingTranscription(true);
+    setError("");
+    setExtractedTranscription("");
+
+    try {
+      const transcriptionResponse = await fetch("/api/extract-transcription", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: formData.url }),
+      });
+
+      if (transcriptionResponse.ok) {
+        const transcriptionData = await transcriptionResponse.json();
+        setExtractedTranscription(transcriptionData.transcription?.text || "");
+        setSuccess("Transcription extracted successfully!");
+      } else {
+        const errorData = await transcriptionResponse.json();
+        throw new Error(errorData.error || "Failed to extract transcription");
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to extract transcription"
+      );
+    } finally {
+      setIsExtractingTranscription(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUploading(true);
@@ -76,6 +114,15 @@ export default function UploadPage() {
       // Validate form data - ONLY company name is required
       if (!formData.companyName.trim()) {
         throw new Error("Company name is required");
+      }
+
+      // Validate YouTube URL if provided
+      if (formData.source === "YOUTUBE_URL" && formData.url) {
+        const youtubeRegex =
+          /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
+        if (!youtubeRegex.test(formData.url)) {
+          throw new Error("Please enter a valid YouTube URL");
+        }
       }
 
       // NO OTHER VALIDATIONS - user can upload with just company name
@@ -116,9 +163,11 @@ export default function UploadPage() {
       }
 
       setUploadProgress(100);
-      setSuccess(
-        "Content uploaded successfully! Processing will begin shortly."
-      );
+      const successMessage =
+        formData.source === "YOUTUBE_URL"
+          ? "YouTube video uploaded successfully! Transcription and analysis will begin shortly. This may take a few minutes for longer videos."
+          : "Content uploaded successfully! Processing will begin shortly.";
+      setSuccess(successMessage);
       setFormData({
         title: "",
         description: "",
@@ -126,6 +175,7 @@ export default function UploadPage() {
         contentType: "AUDIO",
         source: "FILE_UPLOAD",
       });
+      setExtractedTranscription("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -355,18 +405,42 @@ export default function UploadPage() {
                     : "Blog URL"}{" "}
                   *
                 </Label>
-                <Input
-                  id="url"
-                  name="url"
-                  type="url"
-                  value={formData.url || ""}
-                  onChange={handleInputChange}
-                  placeholder={
-                    formData.source === "YOUTUBE_URL"
-                      ? "https://www.youtube.com/watch?v=..."
-                      : "https://example.com/blog-post"
-                  }
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="url"
+                    name="url"
+                    type="url"
+                    value={formData.url || ""}
+                    onChange={handleInputChange}
+                    placeholder={
+                      formData.source === "YOUTUBE_URL"
+                        ? "https://www.youtube.com/watch?v=..."
+                        : "https://example.com/blog-post"
+                    }
+                    className="flex-1"
+                  />
+                  {formData.source === "YOUTUBE_URL" && formData.url && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleExtractTranscription}
+                      disabled={isExtractingTranscription}
+                      className="whitespace-nowrap"
+                    >
+                      {isExtractingTranscription ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Extracting...
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="h-4 w-4 mr-2" />
+                          Extract Transcription
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 
@@ -382,6 +456,40 @@ export default function UploadPage() {
                   placeholder="Paste your text content here... (optional)"
                   rows={8}
                 />
+              </div>
+            )}
+
+            {/* Extracted Transcription Display */}
+            {formData.source === "YOUTUBE_URL" && extractedTranscription && (
+              <div className="space-y-2">
+                <Label>Extracted Transcription</Label>
+                <div className="p-4 bg-gray-50 border rounded-lg max-h-60 overflow-y-auto">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {extractedTranscription}
+                  </p>
+                </div>
+                <p className="text-xs text-gray-500">
+                  This transcription will be automatically saved when you
+                  upload.
+                </p>
+              </div>
+            )}
+
+            {/* Transcription Extraction Progress */}
+            {isExtractingTranscription && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">
+                    Extracting transcription from YouTube video...
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
               </div>
             )}
 
