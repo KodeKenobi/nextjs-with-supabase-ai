@@ -157,6 +157,12 @@ export default function UploadPage() {
         body: uploadFormData,
       });
 
+      if (response.status === 401) {
+        console.log("🔐 User not authenticated, redirecting to login");
+        window.location.href = "/auth/login";
+        return;
+      }
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Upload failed");

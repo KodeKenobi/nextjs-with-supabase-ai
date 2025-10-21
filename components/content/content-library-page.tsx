@@ -63,6 +63,10 @@ export default function ContentLibraryPage() {
         console.log("📊 Content Library Data:", data);
         console.log("📊 First item companies:", data[0]?.companies);
         setContent(data);
+      } else if (response.status === 401) {
+        console.log("🔐 User not authenticated, redirecting to login");
+        window.location.href = "/auth/login";
+        return;
       } else {
         console.error("Failed to fetch content");
         setContent([]);

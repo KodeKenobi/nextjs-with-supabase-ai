@@ -50,6 +50,10 @@ export default function InsightsPage() {
       if (response.ok) {
         const data = await response.json();
         setInsights(data);
+      } else if (response.status === 401) {
+        console.log("🔐 User not authenticated, redirecting to login");
+        window.location.href = "/auth/login";
+        return;
       } else {
         console.error("Failed to fetch insights");
         setInsights([]);
