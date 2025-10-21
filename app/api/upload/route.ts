@@ -21,6 +21,29 @@ export async function POST(request: NextRequest) {
   });
 
   try {
+    // Validate environment variables first
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      console.error("❌ Missing NEXT_PUBLIC_SUPABASE_URL");
+      return NextResponse.json(
+        { error: "Server configuration error: Missing Supabase URL" },
+        { status: 500 }
+      );
+    }
+    if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error("❌ Missing NEXT_PUBLIC_SUPABASE_ANON_KEY");
+      return NextResponse.json(
+        { error: "Server configuration error: Missing Supabase Anon Key" },
+        { status: 500 }
+      );
+    }
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error("❌ Missing SUPABASE_SERVICE_ROLE_KEY");
+      return NextResponse.json(
+        { error: "Server configuration error: Missing Supabase Service Key" },
+        { status: 500 }
+      );
+    }
+
     const supabase = await createClient();
 
     // Get the current user
@@ -156,24 +179,38 @@ export async function POST(request: NextRequest) {
     if (companyName) {
       console.log("🔍 Looking for company:", companyName);
 
-      // First, try to find existing company
-      const { data: existingCompany, error: findError } = await supabaseAdmin
-        .from("companies")
-        .select("id")
-        .eq("name", companyName)
-        .single();
+      let existingCompany = null;
+      try {
+        // First, try to find existing company
+        const { data: companyData, error: findError } = await supabaseAdmin
+          .from("companies")
+          .select("id")
+          .eq("name", companyName)
+          .single();
 
-      console.log("🔍 Company search result:", {
-        found: !!existingCompany,
-        error: findError?.message,
-        errorCode: findError?.code,
-      });
+        console.log("🔍 Company search result:", {
+          found: !!companyData,
+          error: findError?.message,
+          errorCode: findError?.code,
+        });
 
-      if (findError && findError.code !== "PGRST116") {
-        // PGRST116 is "not found" error, which is expected
-        console.error("❌ Error finding company:", findError);
+        if (findError && findError.code !== "PGRST116") {
+          // PGRST116 is "not found" error, which is expected
+          console.error("❌ Error finding company:", findError);
+          return NextResponse.json(
+            { error: "Failed to find company", details: findError.message },
+            { status: 500 }
+          );
+        }
+
+        existingCompany = companyData;
+      } catch (error) {
+        console.error("❌ Company search error:", error);
         return NextResponse.json(
-          { error: "Failed to find company", details: findError.message },
+          {
+            error: "Database error during company search",
+            details: error instanceof Error ? error.message : "Unknown error",
+          },
           { status: 500 }
         );
       }
@@ -184,73 +221,99 @@ export async function POST(request: NextRequest) {
       } else {
         console.log("🏗️ Creating new company:", companyName);
 
-        // Create new company with explicit UUID
-        const newCompanyId = crypto.randomUUID();
-        const { data: newCompany, error: createError } = await supabaseAdmin
-          .from("companies")
-          .insert({
-            id: newCompanyId,
-            name: companyName,
-            description: `Company created from content upload: ${title}`,
-            industry: "Unknown",
-            country: "Unknown",
-            size: "Unknown",
-            type: "TARGET",
-          })
-          .select("id")
-          .single();
+        try {
+          // Create new company with explicit UUID
+          const newCompanyId = crypto.randomUUID();
+          const { data: newCompany, error: createError } = await supabaseAdmin
+            .from("companies")
+            .insert({
+              id: newCompanyId,
+              name: companyName,
+              description: `Company created from content upload: ${title}`,
+              industry: "Unknown",
+              country: "Unknown",
+              size: "Unknown",
+              type: "TARGET",
+            })
+            .select("id")
+            .single();
 
-        console.log("🏗️ Company creation result:", {
-          success: !!newCompany,
-          error: createError?.message,
-          errorCode: createError?.code,
-        });
+          console.log("🏗️ Company creation result:", {
+            success: !!newCompany,
+            error: createError?.message,
+            errorCode: createError?.code,
+          });
 
-        if (createError) {
-          console.error("❌ Error creating company:", createError);
+          if (createError) {
+            console.error("❌ Error creating company:", createError);
+            return NextResponse.json(
+              {
+                error: "Failed to create company",
+                details: createError.message,
+              },
+              { status: 500 }
+            );
+          }
+
+          companyId = newCompanyId;
+          console.log("✅ Created new company:", companyId);
+        } catch (error) {
+          console.error("❌ Company creation error:", error);
           return NextResponse.json(
-            { error: "Failed to create company", details: createError.message },
+            {
+              error: "Database error during company creation",
+              details: error instanceof Error ? error.message : "Unknown error",
+            },
             { status: 500 }
           );
         }
-
-        companyId = newCompanyId;
-        console.log("✅ Created new company:", companyId);
       }
     }
 
     // Create content item in database
     console.log("📄 Creating content item with companyId:", companyId);
 
-    const contentId = crypto.randomUUID();
-    const { data: contentItem, error: contentError } = await supabaseAdmin
-      .from("content_items")
-      .insert({
-        id: contentId,
-        title,
-        description,
-        contenttype: contentType,
-        source: source,
-        status: "PENDING",
-        companyid: companyId,
-        userid: user.id,
-      })
-      .select()
-      .single();
+    let contentId;
+    try {
+      contentId = crypto.randomUUID();
+      const { data: contentItem, error: contentError } = await supabaseAdmin
+        .from("content_items")
+        .insert({
+          id: contentId,
+          title,
+          description,
+          contenttype: contentType,
+          source: source,
+          status: "PENDING",
+          companyid: companyId,
+          userid: user.id,
+        })
+        .select()
+        .single();
 
-    console.log("📄 Content creation result:", {
-      success: !!contentItem,
-      error: contentError?.message,
-      errorCode: contentError?.code,
-      contentId: contentItem?.id,
-    });
+      console.log("📄 Content creation result:", {
+        success: !!contentItem,
+        error: contentError?.message,
+        errorCode: contentError?.code,
+        contentId: contentItem?.id,
+      });
 
-    if (contentError) {
-      console.error("❌ Content creation error:", contentError);
+      if (contentError) {
+        console.error("❌ Content creation error:", contentError);
+        return NextResponse.json(
+          {
+            error: "Failed to create content item",
+            details: contentError.message || "Unknown error",
+          },
+          { status: 500 }
+        );
+      }
+    } catch (error) {
+      console.error("❌ Content creation error:", error);
       return NextResponse.json(
         {
-          error: "Failed to create content item",
-          details: contentError.message || "Unknown error",
+          error: "Database error during content creation",
+          details: error instanceof Error ? error.message : "Unknown error",
         },
         { status: 500 }
       );
