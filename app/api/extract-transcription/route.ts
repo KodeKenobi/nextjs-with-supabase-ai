@@ -4,7 +4,7 @@ import {
   transcribeYouTubeVideo,
   getYouTubeInfo,
   isValidYouTubeUrl,
-} from "@/lib/youtube-processor";
+} from "@/lib/youtube-processor-serverless";
 import { transcriptionRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {

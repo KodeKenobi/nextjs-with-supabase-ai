@@ -45,8 +45,6 @@ export async function getYouTubeInfo(url: string): Promise<YouTubeInfo> {
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0",
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
     ];
 
     while (retries > 0) {
@@ -54,10 +52,9 @@ export async function getYouTubeInfo(url: string): Promise<YouTubeInfo> {
         const userAgent =
           userAgents[Math.floor(Math.random() * userAgents.length)];
         console.log(
-          `🔄 Attempt ${4 - retries} with User-Agent: ${userAgent.substring(
-            0,
-            50
-          )}...`
+          `🔄 Info attempt ${
+            4 - retries
+          } with User-Agent: ${userAgent.substring(0, 50)}...`
         );
 
         info = await ytdl.getInfo(url, {
@@ -85,9 +82,9 @@ export async function getYouTubeInfo(url: string): Promise<YouTubeInfo> {
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-    // If we still don't have info, bail to fallback
-    if (!info || !info.videoDetails) {
-      throw new Error("Missing video details after retries");
+
+    if (!info) {
+      throw new Error("Failed to retrieve YouTube video info after multiple retries.");
     }
 
     const videoDetails = info.videoDetails;
@@ -117,12 +114,11 @@ export async function getYouTubeInfo(url: string): Promise<YouTubeInfo> {
 
 /**
  * Download YouTube audio and transcribe using OpenAI Whisper
+ * Updated for serverless environment (Vercel) - no file system operations
  */
 export async function transcribeYouTubeVideo(
   url: string
 ): Promise<TranscriptionResult> {
-  let tempFilePath: string | null = null;
-
   try {
     console.log("🎥 Starting YouTube video processing:", url);
 
@@ -136,19 +132,7 @@ export async function transcribeYouTubeVideo(
     }
     console.log("✅ OpenAI API key is available");
 
-    // Create temporary file for audio
-    const tempFileName = `audio_${randomBytes(16).toString("hex")}.mp3`;
-    tempFilePath = join(process.cwd(), "temp", tempFileName);
-
-    // Ensure temp directory exists
-    const { mkdir } = await import("fs/promises");
-    try {
-      await mkdir(join(process.cwd(), "temp"), { recursive: true });
-    } catch (err) {
-      // Directory might already exist
-    }
-
-    // Download audio stream with retry logic
+    // Download audio stream directly to memory (no file system)
     let audioStream: NodeJS.ReadableStream | undefined;
     let audioRetries = 2; // Reduced retries for faster fallback
     const userAgents = [
@@ -198,26 +182,26 @@ export async function transcribeYouTubeVideo(
       }
     }
 
-    // Ensure we have a valid stream
     if (!audioStream) {
-      throw new Error("Failed to initialize audio stream");
+      throw new Error("Failed to download YouTube audio after multiple retries.");
     }
 
-    // Write stream to temporary file
-    console.log("💾 Writing audio to temporary file:", tempFilePath);
-    const writeStream = createWriteStream(tempFilePath);
-    await pipeline(audioStream as any, writeStream);
-
-    // Get file stats
-    const { stat } = await import("fs/promises");
-    const stats = await stat(tempFilePath);
-    console.log("🎵 Audio downloaded, size:", stats.size, "bytes");
+    // Collect audio data into buffer chunks
+    console.log("💾 Collecting audio data in memory...");
+    const chunks: Buffer[] = [];
+    
+    for await (const chunk of audioStream) {
+      chunks.push(Buffer.from(chunk));
+    }
+    
+    const audioBuffer = Buffer.concat(chunks);
+    console.log("🎵 Audio collected, size:", audioBuffer.length, "bytes");
 
     // Transcribe using OpenAI Whisper
     console.log("🤖 Starting transcription with OpenAI Whisper...");
     const openai = getOpenAIClient();
     const transcription = await openai.audio.transcriptions.create({
-      file: createReadStream(tempFilePath),
+      file: new File([audioBuffer], "audio.mp3", { type: "audio/mpeg" }),
       model: "whisper-1",
       language: "en", // You can make this dynamic based on video language
       response_format: "verbose_json",
@@ -248,16 +232,6 @@ export async function transcribeYouTubeVideo(
         }`
       );
     }
-  } finally {
-    // Clean up temporary file
-    if (tempFilePath) {
-      try {
-        await unlink(tempFilePath);
-        console.log("🗑️ Cleaned up temporary file:", tempFilePath);
-      } catch (cleanupError) {
-        console.warn("⚠️ Failed to clean up temporary file:", cleanupError);
-      }
-    }
   }
 }
 
@@ -265,41 +239,7 @@ export async function transcribeYouTubeVideo(
  * Validate YouTube URL
  */
 export function isValidYouTubeUrl(url: string): boolean {
-  try {
-    const urlObj = new URL(url);
-    return (
-      ((urlObj.hostname === "www.youtube.com" ||
-        urlObj.hostname === "youtube.com") &&
-        urlObj.pathname === "/watch" &&
-        urlObj.searchParams.has("v")) ||
-      (urlObj.hostname === "youtu.be" && urlObj.pathname.length > 1)
-    );
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Extract video ID from YouTube URL
- */
-export function extractVideoId(url: string): string | null {
-  try {
-    const urlObj = new URL(url);
-
-    if (urlObj.hostname === "youtu.be") {
-      return urlObj.pathname.slice(1);
-    }
-
-    if (
-      (urlObj.hostname === "www.youtube.com" ||
-        urlObj.hostname === "youtube.com") &&
-      urlObj.pathname === "/watch"
-    ) {
-      return urlObj.searchParams.get("v");
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
+  const youtubeRegex =
+    /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)[\w-]+/;
+  return youtubeRegex.test(url);
 }
