@@ -133,32 +133,75 @@ export default function DashboardOverview({ user }: { user: User }) {
     try {
       // Fetch content items
       const contentResponse = await fetch("/api/content");
-      const contentData = contentResponse.ok
-        ? await contentResponse.json()
-        : [];
-      
+      let contentData = [];
+      if (contentResponse.ok) {
+        contentData = await contentResponse.json();
+      } else if (contentResponse.status === 401) {
+        console.log("🔐 User not authenticated, redirecting to login");
+        window.location.href = "/auth/login";
+        return;
+      } else {
+        console.error(
+          "❌ Content API error:",
+          contentResponse.status,
+          contentResponse.statusText
+        );
+      }
+
       console.log("🔍 Dashboard Recent Content Data:", {
         responseOk: contentResponse.ok,
         contentCount: contentData?.length || 0,
         firstItem: contentData?.[0],
-        firstItemCompany: contentData?.[0]?.companies
+        firstItemCompany: contentData?.[0]?.companies,
       });
 
       // Fetch business insights
       const insightsResponse = await fetch("/api/insights");
-      const insightsData = insightsResponse.ok
-        ? await insightsResponse.json()
-        : [];
+      let insightsData = [];
+      if (insightsResponse.ok) {
+        insightsData = await insightsResponse.json();
+      } else if (insightsResponse.status === 401) {
+        console.log("🔐 User not authenticated for insights");
+        return;
+      } else {
+        console.error(
+          "❌ Insights API error:",
+          insightsResponse.status,
+          insightsResponse.statusText
+        );
+      }
 
       // Fetch consistency reports
       const consistencyResponse = await fetch("/api/consistency");
-      const consistencyData = consistencyResponse.ok
-        ? await consistencyResponse.json()
-        : [];
+      let consistencyData = [];
+      if (consistencyResponse.ok) {
+        consistencyData = await consistencyResponse.json();
+      } else if (consistencyResponse.status === 401) {
+        console.log("🔐 User not authenticated for consistency");
+        return;
+      } else {
+        console.error(
+          "❌ Consistency API error:",
+          consistencyResponse.status,
+          consistencyResponse.statusText
+        );
+      }
 
       // Fetch gap analysis reports
       const gapsResponse = await fetch("/api/gaps");
-      const gapsData = gapsResponse.ok ? await gapsResponse.json() : [];
+      let gapsData = [];
+      if (gapsResponse.ok) {
+        gapsData = await gapsResponse.json();
+      } else if (gapsResponse.status === 401) {
+        console.log("🔐 User not authenticated for gaps");
+        return;
+      } else {
+        console.error(
+          "❌ Gaps API error:",
+          gapsResponse.status,
+          gapsResponse.statusText
+        );
+      }
 
       // Calculate stats
       const totalContent = contentData.length || 0;
@@ -178,7 +221,8 @@ export default function DashboardOverview({ user }: { user: User }) {
       });
 
       // Set recent data (last 5 items)
-      const recentContentData = (contentData as ContentItem[]).slice(0, 5) || [];
+      const recentContentData =
+        (contentData as ContentItem[]).slice(0, 5) || [];
       console.log("🔍 Recent Content (first 5):", recentContentData);
       setRecentContent(recentContentData);
       setRecentInsights((insightsData as Insight[]).slice(0, 5) || []);

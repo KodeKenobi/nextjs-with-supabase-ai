@@ -12,7 +12,17 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      console.log("❌ Content API: User not authenticated", {
+        userError: userError?.message,
+      });
+      return NextResponse.json(
+        {
+          error: "Authentication required",
+          message: "Please log in to access content",
+          code: "UNAUTHORIZED",
+        },
+        { status: 401 }
+      );
     }
 
     // Fetch ALL content items from ALL companies
