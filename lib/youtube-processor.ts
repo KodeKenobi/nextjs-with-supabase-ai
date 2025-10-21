@@ -1,5 +1,10 @@
 import ytdl from "ytdl-core";
 import OpenAI from "openai";
+import { randomBytes } from "crypto";
+import { join } from "path";
+import { createWriteStream, createReadStream } from "fs";
+import { pipeline } from "stream/promises";
+import { unlink } from "fs/promises";
 import {
   getYouTubeInfoFallback,
   transcribeYouTubeVideoFallback,
